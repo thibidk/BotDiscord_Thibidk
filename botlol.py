@@ -3,7 +3,6 @@ import os
 import time
 import random
 import datetime
-import asyncio
 import aiohttp
 import requests
 import urllib.parse
@@ -17,10 +16,10 @@ from champions import CHAMPION_NAME_TO_ID, CHAMPION_NAME_FIX
 print("Lancement du bot...")
 
 load_dotenv()
-riot_token = os.getenv('RIOT_TOKEN')
+RIOT_TOKEN = os.getenv('RIOT_TOKEN')
 openai.api_key = os.getenv("OPENAI_API_KEY")
-Game_Channel_ID = int(os.getenv('Game_CHANNEL_ID'))
-General_Channel_ID = int(os.getenv('General_Channel_ID'))
+GAME_CHANNEL_ID = int(os.getenv('GAME_CHANNEL_ID'))
+GENERAL_CHANNEL_ID = int(os.getenv('GENERAL_CHANNEL_ID'))
 USER_IDS_TO_NOTIFY = [283962205680959488]
 PRAYER_ADVANCE_MINUTES = 60
 
@@ -46,7 +45,7 @@ PLAYERS = [
 
 # Remplissage du puuid pour chaque joueur
 for player in PLAYERS:
-    url = f"https://europe.api.riotgames.com/riot/account/v1/accounts/by-riot-id/{player.gameName}/{player.tagLine}?api_key={riot_token}"
+    url = f"https://europe.api.riotgames.com/riot/account/v1/accounts/by-riot-id/{player.gameName}/{player.tagLine}?api_key={RIOT_TOKEN}"
     response = requests.get(url)
     if response.status_code == 200:
         data = response.json()
@@ -233,7 +232,6 @@ async def on_message(message):
     
     contenu = message.content.lower()
     reponses = {
-        'ipute': "Il s'agirait de grandir un peu",
         'idaily': 'Laisse moi dehak',
         'salam alaykoum': 'wa 3alaykoum salam',
         'salut': 'Salut bg',
@@ -254,7 +252,7 @@ async def on_message(message):
         await message.channel.send(random.choice(reponses_bonjour))
         return
 
-    if client.user in message.mentions and any(mot in contenu for mot in ('ça va', 'cv', 'tu vas bien')):
+    if client.user in message.mentions and any(mot in contenu for mot in ('ça va', 'cv', 'tu vas bien','ca va','cava','çava')):
         reponses_ca_va = [
             'Oui ça va et toi?',
             'ça va Al hamdulillah et toi?',
@@ -269,6 +267,12 @@ async def on_message(message):
         await message.channel.send(reponse)
         return
 
+    if message.content.strip().lower() == "!dé":
+        de1 = random.randint(1, 6)
+        de2 = random.randint(1, 6)
+        await message.channel.send(f"🎲 Tu as lancé : {de1} et {de2} !")
+        return
+    
     # Réponses personnalisées par mots ou mentions
 
     if (
@@ -279,10 +283,8 @@ async def on_message(message):
         if r < 0.10:
             await message.channel.send('Je suis le Goulth')
         elif r < 0.20:
-            await message.channel.send("Pov je suis le goulth : gneu gneu je suis le goulth. xD")
-        elif r < 0.30:
             await message.channel.send("Tititititi")
-        elif r < 0.40:
+        elif r < 0.30:
             await message.channel.send('Ah oui ah oui heiiiiiiin')
         return
 
@@ -292,10 +294,8 @@ async def on_message(message):
     ):
         r = random.random()
         if r < 0.10:
-            await message.channel.send('La chialeuse a été mentionnée, un double 5 et la pile sera purifiée')
+            await message.channel.send('Monsieur <@516681520669523979>, vous avez été mentionné')
         elif r < 0.20:
-            await message.channel.send('Maître <@516681520669523979> un gueux vous a mentionné')
-        elif r < 0.30:
             await message.channel.send("Fiiiiiiiiin")
         return
 
@@ -317,7 +317,7 @@ async def on_message(message):
             await message.channel.send('Ping le nul<@300644159566381060>')
         return
 
-    if message.channel.id != Game_Channel_ID:
+    if message.channel.id != GAME_CHANNEL_ID:
         if contenu in reponses:
             await message.channel.send(reponses[contenu])
         return
@@ -326,15 +326,15 @@ async def on_message(message):
 @tasks.loop(minutes=3)
 async def check_games():
     try:
-        channel = await client.fetch_channel(Game_Channel_ID)
+        channel = await client.fetch_channel(GAME_CHANNEL_ID)
         for player in PLAYERS:
             if not player.puuid:
                 continue
             platform = "euw1"
             region_api = "euw1"
             region_match = "europe"
-            rank = await fetch_summoner_rank(player, region_api, riot_token)
-            game = await fetch_current_game(player.puuid, platform, riot_token)
+            rank = await fetch_summoner_rank(player, region_api, RIOT_TOKEN)
+            game = await fetch_current_game(player.puuid, platform, RIOT_TOKEN)
             if not game:
                 continue
             game_id = game.get('gameId')
@@ -365,7 +365,7 @@ async def check_games():
             if champion_id is None or champion_name is None:
                 winrate = "N/A"
             else:
-                winrate = await fetch_winrate(player.puuid, champion_id, region_match, riot_token)
+                winrate = await fetch_winrate(player.puuid, champion_id, region_match, RIOT_TOKEN)
 
             embed = discord.Embed(title="Une bête vient de lancer")
             embed.add_field(name="Summoner", value=player.gameName, inline=True)
