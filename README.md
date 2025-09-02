@@ -86,4 +86,4 @@ python botlol.py
 
 ## Auteur
 Leclerc Thibault
-> Adapté et structuré avec l'aide GitHub Copilot 
+> Adapté et structuré avec l'aide de GitHub Copilot 
