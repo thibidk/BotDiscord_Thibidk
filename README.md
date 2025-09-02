@@ -24,9 +24,9 @@ cd BotDiscord
 
 ### 2. **Installer les dépendances**
 ```sh
-pip install -r requirements.txt
+pip install -r requirements.txt   !! Pas encore dans le dossier git!!
 ```
-> Si tu n’as pas de `requirements.txt`, installe :
+> Pas de `requirements.txt`, il faut installer manuellement:
 > pip install discord.py aiohttp requests python-dotenv openai
 
 > Version python 3.13
