@@ -49,17 +49,21 @@ Exemple de mon contenu :
 - GENERAL_CHANNEL_ID=ID_du_channel (clic droit copier l'identifiant du salon)
 - USER_IDS_TO_NOTIFY=USER_ID=USER_ID (clic droit sur une personne discord)
 
-  Pour les channels ainsi que user IDs, il est possible d'ajouter plusieurs ID de cette manière (attention aux virgules et aux espaces) : 
+Pour les channels ainsi que user IDs, il est possible d'ajouter plusieurs ID de cette manière (attention aux virgules et aux espaces) : 
 
-  EXEMPLE_CHANNEL_ID=ID_du_channel_1,ID_du_channel_2,ID_du_channel_3  etc... pas d'espace, pas de ' et une virgule entre les IDS
+EXEMPLE_CHANNEL_ID=ID_du_channel_1,ID_du_channel_2,ID_du_channel_3  etc... pas d'espace, pas de ' et une virgule entre les IDS
 
 ### 4. **Changer le contenu du code**
 
 Il vous faudra changer quelques paramètres pour que le bot vous soit utile comme par exemple :
--  Pour la fonctionnalité Lol, remplacer les gamenames par les noms d'invocateurs et les taglines par les #EUW par exemple
--  Pour la fonctionnalité prière, il suffit de remplacer le lien Aladhan par celui de votre ville dans async def get_prayer_times_aladhan():
-- Possibilité de modifier l'heure du rappel en modifiant le temps dans la variable PRAYER_ADVANCE_MINUTES
-- Possibilité d'ajouter des membres dans le .env il suffit simplement de coller le User_ID (suivre l'exemple)
+-  **Pour la fonctionnalité Lol** : Remplacer les gamenames par les noms d'invocateurs de votre choix et les taglines par les # (EUW par exemple)
+-  **Pour la fonctionnalité prière** : Il suffit de remplacer le lien Aladhan par celui de votre ville dans 
+```sh
+async def get_prayer_times_aladhan():
+```
+- **Possibilité de modifier l'heure du rappel** : Modifier le temps dans la variable PRAYER_ADVANCE_MINUTES
+- **Possibilité d'ajouter des membres ou des channels dans le .env** : Coller l'ID (suivre l'exemple)
+- **Modifier les réponses du bot** : Change le dictionnaire `reponses` ou les conditions dans `on_message`.
 
 ### 5. **Lancer le bot**
 ```sh
@@ -75,14 +79,6 @@ python botlol.py
 - **Rappel de prières** : Envoie un rappel en DM avant chaque prière (Strasbourg). Possibilité de changer les DM par un channel discord.
 - **Suivi LoL** : Annonce automatiquement quand un joueur de la liste lance une partie.
 - **!dé** : Lance deux dés (1 à 6) et affiche le résultat.
----
-
-## Personnalisation
-
-- **Ajouter/retirer des joueurs LoL** : Modifie la liste `PLAYERS` dans `botlol.py`.
-- **Changer les channels** : Modifie les IDs dans le `.env`.
-- **Modifier les réponses du bot** : Change le dictionnaire `reponses` ou les conditions dans `on_message`.
-
 ---
 
 ## Dépendances
