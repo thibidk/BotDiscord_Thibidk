@@ -20,7 +20,8 @@ RIOT_TOKEN = os.getenv('RIOT_TOKEN')
 openai.api_key = os.getenv("OPENAI_API_KEY")
 GAME_CHANNEL_ID = int(os.getenv('GAME_CHANNEL_ID'))
 GENERAL_CHANNEL_ID = int(os.getenv('GENERAL_CHANNEL_ID'))
-USER_IDS_TO_NOTIFY = [int(os.getenv('USER_IDS_TO_NOTIFY'))]
+user_ids_raw = os.getenv('USER_IDS_TO_NOTIFY', '')
+USER_IDS_TO_NOTIFY = [int(uid.strip()) for uid in user_ids_raw.split(',') if uid.strip()]
 PRAYER_ADVANCE_MINUTES = 60
 
 # =============== DATACLASSES & JOUEURS ===============
