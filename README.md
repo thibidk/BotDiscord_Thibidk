@@ -62,7 +62,7 @@ Il vous faudra changer quelques paramètres pour que le bot vous soit utile comm
 async def get_prayer_times_aladhan():
 ```
 - **Possibilité de modifier l'heure du rappel** : Modifier le temps dans la variable PRAYER_ADVANCE_MINUTES
-- **Possibilité d'ajouter des membres ou des channels dans le .env** : Coller l'ID (suivre l'exemple)
+- **Possibilité d'ajouter des membres ou des channels dans le .env** : Coller l'ID (suivre l'exemple du .3)
 - **Modifier les réponses du bot** : Change le dictionnaire `reponses` ou les conditions dans `on_message`.
 
 ### 5. **Lancer le bot**
@@ -96,6 +96,9 @@ Comme dis plus haut,
 - Pour utiliser l’API OpenAI, il te faut une clé valide et du crédit sur ton compte.
 - Pour l’API Riot, la clé de développement doit être régénérée toutes les 24h (sauf clé production).
 - Pour l’hébergement 24/7, utilise un VPS ou un service cloud.
+- Pense à bien mettre les noms d'invocateurs+# des gens que te veux suivre
+- Si le bot run sur un serveur attantion à ce que l'heure du serveur soit bien la même que la tienne sinon le rappel sera en décalé
+- 
 
 
 ## Auteur
