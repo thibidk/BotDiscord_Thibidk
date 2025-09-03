@@ -69,7 +69,7 @@ async def get_prayer_times_aladhan():
 ```sh
 python botlol.py
 ```
-
+Ou run directement avec le bouton sur VCS
 ---
 
 ## Fonctionnalités principales
@@ -92,7 +92,7 @@ python botlol.py
 ---
 
 ## Attention pour ces fonctionnalités
-    Comme dis plus haut, 
+Comme dis plus haut, 
 
 - Pour utiliser l’API OpenAI, il te faut une clé valide et du crédit sur ton compte.
 - Pour l’API Riot, la clé de développement doit être régénérée toutes les 24h (sauf clé production).
