@@ -70,7 +70,6 @@ async def get_prayer_times_aladhan():
 python botlol.py
 ```
 Ou run directement avec le bouton sur VCS
----
 
 ## Fonctionnalités principales
 
