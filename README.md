@@ -31,9 +31,9 @@ cd BotDiscord
 
 ### 2. **Installer les dépendances**
 ```sh
-pip install -r requirements.txt
+pip install -r requirements.txt (Pas encore effectif)
 ```
-> Si tu n’as pas de `requirements.txt`, installe :
+> Il faudra installer manuellement :
 > pip install discord.py aiohttp requests python-dotenv openai
 
 > Version python 3.13
@@ -43,11 +43,15 @@ pip install -r requirements.txt
 Exemple de mon contenu :
 
 - DISCORD_TOKEN=ton_token_discord (à récupérer lors de la création du Bot discord)
-- RIOT_TOKEN=ta_cle_riot (à générer sur le site Riot API)
+- RIOT_TOKEN=ta_cle_riot (à générer sur le site Riot developper portal)
 - OPENAI_API_KEY=ta_cle_openai (à récupérer sur le site openAI)
 - GAME_CHANNEL_ID=ID_du_channel (clic droit copier l'identifiant du salon)
 - GENERAL_CHANNEL_ID=ID_du_channel (clic droit copier l'identifiant du salon)
-- USER_IDS_TO_NOTIFY=USER_ID=USER_ID_1,USER_ID_2 (clic droit sur une personne discord)
+- USER_IDS_TO_NOTIFY=USER_ID=USER_ID (clic droit sur une personne discord)
+
+  Pour les channels ainsi que user IDs, il est possible d'ajouter plusieurs ID de cette manière (attention aux virgules et aux espaces) : 
+
+  EXEMPLE_CHANNEL_ID=ID_du_channel_1,ID_du_channel_2,ID_du_channel_3  etc... pas d'espace, pas de ' et une virgule entre les IDS
 
 ### 4. **Changer le contenu du code**
 
@@ -55,7 +59,7 @@ Il vous faudra changer quelques paramètres pour que le bot vous soit utile comm
 -  Pour la fonctionnalité Lol, remplacer les gamenames par les noms d'invocateurs et les taglines par les #EUW par exemple
 -  Pour la fonctionnalité prière, il suffit de remplacer le lien Aladhan par celui de votre ville dans async def get_prayer_times_aladhan():
 - Possibilité de modifier l'heure du rappel en modifiant le temps dans la variable PRAYER_ADVANCE_MINUTES
-- Possibilité d'ajouter des membres dans le .env il suffit simplement de coller le User_ID (suivre l'exemple, ne pas mettre d'espace ni ')
+- Possibilité d'ajouter des membres dans le .env il suffit simplement de coller le User_ID (suivre l'exemple)
 
 ### 5. **Lancer le bot**
 ```sh
@@ -91,7 +95,8 @@ python botlol.py
 
 ---
 
-## Remarques
+## Attention pour ces fonctionnalités
+    Comme dis plus haut, 
 
 - Pour utiliser l’API OpenAI, il te faut une clé valide et du crédit sur ton compte.
 - Pour l’API Riot, la clé de développement doit être régénérée toutes les 24h (sauf clé production).
