@@ -98,8 +98,6 @@ Comme dis plus haut,
 - Pour l’hébergement 24/7, utilise un VPS ou un service cloud.
 - Pense à bien mettre les noms d'invocateurs+# des gens que te veux suivre
 - Si le bot run sur un serveur attantion à ce que l'heure du serveur soit bien la même que la tienne sinon le rappel sera en décalé
-- 
-
 
 ## Auteur
 Leclerc Thibault
