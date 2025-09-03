@@ -274,6 +274,11 @@ async def on_message(message):
         await message.channel.send(f"🎲 Tu as lancé : {de1} et {de2} !")
         return
     
+    if message.content.strip().lower() == "!nombre":
+        nombre = random.randint(1, 10)
+        await message.channel.send(f"🔢 Le nombre aléatoire est : {nombre} !")
+        return
+    
     # Réponses personnalisées par mots ou mentions
 
     if (
