@@ -6,18 +6,20 @@ Ceci est mon premier projet sur Python, sans but particulier j'ai implanté des 
 
 Ce bot Discord propose :
 - Suivi de parties League of Legends (récupération du rang, champion, winrate, etc.), Attention, je n'ai pas réussi à récupérer l'élo du joueur. L'embed discord n'est pas encore à jour, il y a seulement le strict minimum.
-- Commandes diverses comme `!dé` pour lancer deux dés aléatoires.
 - Réponses personnalisées selon les messages ou mentions.
-- Chat IA avec OpenAI (texte et images, si tu as accès à GPT-4o via API openAI)
-- Rappel des horaires de prières (Strasbourg mais reste modidifiable via l'API)
+- Chat IA avec OpenAI (texte et images, si tu as accès à GPT-4o via API openAI, attention il faut payer pour avoir des tokens sur votre key, le bot ne pourra pas fournir de réponse s'il n'y a pas de token)
+- Rappel des horaires de prières (Strasbourg mais reste modidifiable)
 - Réponses aux messages privés (texte et images)
+- Commandes diverses comme `!dé` pour lancer deux dés aléatoires.
 
 ---
 
 ## Installation
-### 1. Création du bot discord + récupération des API keys
+
+### 1. **Création du bot discord + récupération des API keys**
 ```sh
 - Création via le portail développeur Discord pour obtenir un token
+- Passer en mode développeur dans les paramètre de l'application discord 
 - Récupération des API keys à placer plus tard dans un fichier .env (OpenAI, Riot Games et Discord token)
 ```
 
@@ -36,7 +38,7 @@ pip install -r requirements.txt
 
 > Version python 3.13
 
-### 3. **Créer un fichier .env
+### 3. **Créer un fichier .env**
 
 Exemple de mon contenu :
 
@@ -45,9 +47,17 @@ Exemple de mon contenu :
 - OPENAI_API_KEY=ta_cle_openai (à récupérer sur le site openAI)
 - GAME_CHANNEL_ID=ID_du_channel (clic droit copier l'identifiant du salon)
 - GENERAL_CHANNEL_ID=ID_du_channel (clic droit copier l'identifiant du salon)
+- USER_IDS_TO_NOTIFY=USER_ID=USER_ID_1,USER_ID_2 (clic droit sur une personne discord)
 
+### 4. **Changer le contenu du code**
 
-### 4. **Lancer le bot**
+Il vous faudra changer quelques paramètres pour que le bot vous soit utile comme par exemple :
+-  Pour la fonctionnalité Lol, remplacer les gamenames par les noms d'invocateurs et les taglines par les #EUW par exemple
+-  Pour la fonctionnalité prière, il suffit de remplacer le lien Aladhan par celui de votre ville dans async def get_prayer_times_aladhan():
+- Possibilité de modifier l'heure du rappel en modifiant le temps dans la variable PRAYER_ADVANCE_MINUTES
+- Possibilité d'ajouter des membres dans le .env il suffit simplement de coller le User_ID (suivre l'exemple, ne pas mettre d'espace ni ')
+
+### 5. **Lancer le bot**
 ```sh
 python botlol.py
 ```
@@ -56,12 +66,11 @@ python botlol.py
 
 ## Fonctionnalités principales
 
-- **!dé** : Lance deux dés (1 à 6) et affiche le résultat.
-- **Suivi LoL** : Annonce automatiquement quand un joueur de la liste lance une partie.
 - **Chat IA** : Mentionne le bot ou parle-lui en DM pour une réponse IA (texte ou image).
 - **Réponses personnalisées** : Blagues, réponses à certains pseudos, interactions selon certaines mots... 
 - **Rappel de prières** : Envoie un rappel en DM avant chaque prière (Strasbourg). Possibilité de changer les DM par un channel discord.
-
+- **Suivi LoL** : Annonce automatiquement quand un joueur de la liste lance une partie.
+- **!dé** : Lance deux dés (1 à 6) et affiche le résultat.
 ---
 
 ## Personnalisation
