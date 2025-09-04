@@ -7,6 +7,9 @@ import aiohttp
 import requests
 import urllib.parse
 import openai
+import subprocess
+import sys
+import asyncio
 from dataclasses import dataclass
 from discord.ext import tasks
 import discord
@@ -23,6 +26,7 @@ GENERAL_CHANNEL_ID = int(os.getenv('GENERAL_CHANNEL_ID'))
 user_ids_raw = os.getenv('USER_IDS_TO_NOTIFY', '')
 USER_IDS_TO_NOTIFY = [int(uid.strip()) for uid in user_ids_raw.split(',') if uid.strip()]
 PRAYER_ADVANCE_MINUTES = 60
+
 
 # =============== DATACLASSES & JOUEURS ===============
 @dataclass
@@ -203,7 +207,7 @@ async def on_ready():
         check_games.start()
     if not prayer_reminder.is_running():
         prayer_reminder.start()
-
+    asyncio.create_task(auto_update()) 
 @client.event
 async def on_message(message):
     
@@ -407,6 +411,19 @@ async def prayer_reminder():
                     await user.send(f"⏰ Rappel : {prayer} dans {PRAYER_ADVANCE_MINUTES} minutes environ inshaAllah ! Regarde ton téléphone ")
     except Exception as e:
         print("Erreur dans prayer_reminder:", e)
+
+# =============== Mise à jour automatique du bot ===============
+
+async def auto_update(interval_minutes=60):
+    await asyncio.sleep(10)  # Laisse le bot démarrer proprement
+    while True:
+        await asyncio.sleep(interval_minutes * 60)
+        print("Vérification des mises à jour...")
+        result = subprocess.run(['git', 'pull'], capture_output=True, text=True)
+        print(result.stdout)
+        if "Already up to date." not in result.stdout:
+            print("Mise à jour détectée, redémarrage du bot...")
+            os.execv(sys.executable, [sys.executable] + sys.argv)
 
 # =============== LANCEMENT DU BOT ===============
 client.run(os.getenv('DISCORD_TOKEN'))
