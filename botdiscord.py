@@ -45,7 +45,7 @@ PLAYERS = [
     Player(gameName="GOULEM DE FARINE", tagLine="EUW"),
 ]
 
-# Remplissage du puuid pour chaque joueur (asynchrone)
+# Remplissage du puuid pour chaque joueur 
 async def fetch_puuids():
     async with aiohttp.ClientSession() as session:
         for player in PLAYERS:
@@ -432,7 +432,7 @@ async def prayer_reminder():
 # =============== Mise à jour automatique du bot ===============
 
 async def auto_update(interval_minutes=60):
-    await asyncio.sleep(10)  # Laisse le bot démarrer proprement
+    await asyncio.sleep(10)  
     while True:
         await asyncio.sleep(interval_minutes * 60)
         print("Vérification des mises à jour...")
