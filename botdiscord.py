@@ -23,6 +23,7 @@ GAME_CHANNEL_ID = int(os.getenv('GAME_CHANNEL_ID'))
 GENERAL_CHANNEL_ID = int(os.getenv('GENERAL_CHANNEL_ID'))
 user_ids_raw = os.getenv('USER_IDS_TO_NOTIFY', '')
 USER_IDS_TO_NOTIFY = [int(uid.strip()) for uid in user_ids_raw.split(',') if uid.strip()]
+print("USER_IDS_TO_NOTIFY =", USER_IDS_TO_NOTIFY)  
 PRAYER_ADVANCE_MINUTES = 60
 
 # =============== DATACLASSES & JOUEURS ===============
@@ -418,12 +419,20 @@ async def check_games():
             else:
                 winrate = await fetch_winrate(player.puuid, champion_id, region_match, RIOT_TOKEN)
 
+            if champion_name_fixed:
+                champion_image_url = f"https://ddragon.leagueoflegends.com/cdn/14.12.1/img/champion/{champion_name_fixed.replace(' ', '')}.png"
+            else:
+                champion_image_url = None
+
             embed = discord.Embed(title="Une bête vient de lancer")
             embed.add_field(name="Summoner", value=player.gameName, inline=True)
             embed.add_field(name="File", value=queue_type or "Inconnue", inline=True)
             embed.add_field(name="Champion", value=champion_name_fixed or "Inconnu", inline=True)
             embed.add_field(name="Elo", value=rank or "Unranked", inline=True)
             embed.add_field(name="Winrate sur ce champion", value=winrate or "Inconnue", inline=True)
+
+            if champion_image_url:
+                embed.set_thumbnail(url=champion_image_url)
 
             await channel.send(embed=embed)
     except Exception as e:
@@ -442,6 +451,7 @@ async def prayer_reminder():
                 continue
             prayer_time = parse_time(prayer_time_str)
             reminder_dt = (datetime.datetime.combine(now.date(), prayer_time) - datetime.timedelta(minutes=PRAYER_ADVANCE_MINUTES))
+            print(f"Pour {prayer}: rappel à {reminder_dt.strftime('%H:%M')}, il est {now.strftime('%H:%M')}")
             if now.hour == reminder_dt.hour and now.minute == reminder_dt.minute:
                 for user_id in USER_IDS_TO_NOTIFY:
                     print(f"Tentative d'envoi à {user_id}")
