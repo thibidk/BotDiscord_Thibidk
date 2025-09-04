@@ -277,8 +277,10 @@ async def on_message(message):
         await message.channel.send(random.choice(reponses_qui))
         return
     
+    SPECIAL_USERS = [300644159566381060, 1279835513150378017]  
+
     if client.user in message.mentions:
-        if message.author.id == 300644159566381060:
+        if message.author.id in SPECIAL_USERS:
             r = random.random()
             if r < 0.10:
                 await message.channel.send("Couché le toutou")
@@ -288,6 +290,10 @@ async def on_message(message):
                 await message.channel.send("Ta gueule Jav")
             elif r < 0.40:
                 await message.channel.send("menfou")
+            else:
+                await message.channel.typing()
+                reponse = await ask_gpt(contenu)
+                await message.channel.send(reponse)
         else:
             await message.channel.typing()
             reponse = await ask_gpt(contenu)
