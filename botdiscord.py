@@ -452,10 +452,10 @@ async def prayer_reminder():
 
 # =============== Mise à jour automatique du bot ===============
 
-async def auto_update(interval_minutes=60):
+async def auto_update(interval_minutes=30):
     await asyncio.sleep(10)  
     while True:
-        await asyncio.sleep(interval_minutes * 60)
+        await asyncio.sleep(interval_minutes * 30)
         print("Vérification des mises à jour...")
         result = subprocess.run(['git', 'pull'], capture_output=True, text=True)
         print(result.stdout)
