@@ -8,6 +8,7 @@ import openai
 import subprocess
 import sys
 import asyncio
+import http.client
 from dataclasses import dataclass
 from discord.ext import tasks
 import discord
@@ -187,7 +188,7 @@ async def fetch_winrate(puuid, champion_id, region, riot_token, max_matches=20):
         loses = total - wins
         return f"{winrate}% ({wins}/{loses})"
 
-# =============== FONCTIONS PRIÈRES ===============
+# =============== FONCTIONS PRIÈRES & Hadith ===============
 
 async def get_prayer_times_aladhan():
     url = "https://api.aladhan.com/v1/timingsByCity?city=Strasbourg&country=France&method=2"
@@ -199,6 +200,20 @@ async def get_prayer_times_aladhan():
 def parse_time(time_str):
     return datetime.datetime.strptime(time_str, "%H:%M").time()
 
+async def get_random_hadith():
+    url = "https://hadeethenc.com/api/v1/hadeeths/list/?language=fr&page=1&rowsPerPage=1&random=1"
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as resp:
+            if resp.status != 200:
+                return "Impossible de récupérer un hadith pour le moment."
+            data = await resp.json()
+            if not data or not data.get("data"):
+                return "Aucun hadith trouvé."
+            hadith = data["data"][0]
+            texte = hadith.get("hadeeth", "Hadith inconnu.")
+            source = hadith.get("attribution", "")
+            return f"**Hadith :**\n{texte}\n\n*Source :* {source}"
+        
 # =============== DISCORD BOT ===============
 
 intents = discord.Intents.all()
@@ -304,6 +319,12 @@ async def on_message(message):
             await message.channel.send(reponse)
         return
     
+    if message.content.lower().startswith("!hadits"):
+        await message.channel.typing()
+        hadith = await get_random_hadith()
+        await message.channel.send(hadith)
+        return
+
     if message.content.lower().startswith("!prière"):
         times = await get_prayer_times_aladhan()
         now = datetime.datetime.now().time()
