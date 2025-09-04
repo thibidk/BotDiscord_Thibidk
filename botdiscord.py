@@ -1,10 +1,8 @@
 # =============== IMPORTS & VARIABLES ===============
 import os
-import time
 import random
 import datetime
 import aiohttp
-import requests
 import urllib.parse
 import openai
 import subprocess
@@ -27,7 +25,6 @@ user_ids_raw = os.getenv('USER_IDS_TO_NOTIFY', '')
 USER_IDS_TO_NOTIFY = [int(uid.strip()) for uid in user_ids_raw.split(',') if uid.strip()]
 PRAYER_ADVANCE_MINUTES = 60
 
-
 # =============== DATACLASSES & JOUEURS ===============
 @dataclass
 class Player:
@@ -48,24 +45,26 @@ PLAYERS = [
     Player(gameName="GOULEM DE FARINE", tagLine="EUW"),
 ]
 
-# Remplissage du puuid pour chaque joueur
-for player in PLAYERS:
-    url = f"https://europe.api.riotgames.com/riot/account/v1/accounts/by-riot-id/{player.gameName}/{player.tagLine}?api_key={RIOT_TOKEN}"
-    response = requests.get(url)
-    if response.status_code == 200:
-        data = response.json()
-        player.puuid = data['puuid']
-        print(f"{player.gameName}#{player.tagLine} → PUUID : {data['puuid']}")
-    else:
-        print(f"Erreur pour {player.gameName}#{player.tagLine} : {response.status_code} - {response.text}")
-    time.sleep(0.1)
+# Remplissage du puuid pour chaque joueur (asynchrone)
+async def fetch_puuids():
+    async with aiohttp.ClientSession() as session:
+        for player in PLAYERS:
+            url = f"https://europe.api.riotgames.com/riot/account/v1/accounts/by-riot-id/{player.gameName}/{player.tagLine}?api_key={RIOT_TOKEN}"
+            async with session.get(url) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    player.puuid = data['puuid']
+                    print(f"{player.gameName}#{player.tagLine} → PUUID : {data['puuid']}")
+                else:
+                    print(f"Erreur pour {player.gameName}#{player.tagLine} : {response.status} - {await response.text()}")
 
 last_announced_game_ids = {}  # clé = puuid, valeur = gameId
 
 # =============== FONCTIONS OPENAI ===============
 async def ask_gpt(prompt):
     try:
-        response = openai.ChatCompletion.create(
+        response = await asyncio.to_thread(
+            openai.ChatCompletion.create,
             model="gpt-4o",
             messages=[{"role": "user", "content": prompt}]
         )
@@ -101,7 +100,7 @@ async def get_summoner_id(encryptedPUUID, region, riot_token):
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as resp:
             if resp.status != 200:
-                print(f"Erreur summonerId pour puuid={encryptedPUUID}: {resp.status}") # l'erreur est ici
+                print(f"Erreur summonerId pour puuid={encryptedPUUID}: {resp.status}")
                 return None
             data = await resp.json()
             return data.get("id")
@@ -203,14 +202,15 @@ client = discord.Client(intents=intents)
 
 @client.event
 async def on_ready():
+    await fetch_puuids()
     if not check_games.is_running():
         check_games.start()
     if not prayer_reminder.is_running():
         prayer_reminder.start()
     asyncio.create_task(auto_update()) 
+
 @client.event
 async def on_message(message):
-    
     if message.author == client.user:
         return
     
@@ -220,7 +220,8 @@ async def on_message(message):
             if message.attachments:
                 image_url = message.attachments[0].url
                 user_text = message.content if message.content else "Décris cette image"
-                response = openai.ChatCompletion.create(
+                response = await asyncio.to_thread(
+                    openai.ChatCompletion.create,
                     model="gpt-4o",
                     messages=[
                         {"role": "user", "content": [
@@ -277,9 +278,16 @@ async def on_message(message):
         return
     
     if client.user in message.mentions:
-   
-        if message.author.id == 300644159566381060 and random.random() < 0.10:
-            await message.channel.send("Couché le toutou")
+        if message.author.id == 300644159566381060:
+            r = random.random()
+            if r < 0.10:
+                await message.channel.send("Couché le toutou")
+            elif r < 0.20:
+                await message.channel.send("Je dois ping le nul, <@300644159566381060>")
+            elif r < 0.30:
+                await message.channel.send("Ta gueule Jav")
+            elif r < 0.40:
+                await message.channel.send("menfou")
         else:
             await message.channel.typing()
             reponse = await ask_gpt(contenu)
@@ -295,12 +303,6 @@ async def on_message(message):
     if "!nombre" in message.content.lower():
         nombre = random.randint(1, 10)
         await message.channel.send(f"🔢 Le nombre aléatoire est : {nombre} !")
-        return
-    
-    # Réponses personnalisées par mots ou mentions
-
-    if client.user in message.mentions and message.author.id == 300644159566381060:
-        await message.channel.send("Oui ptit toutou")
         return
     
     if (
