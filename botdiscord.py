@@ -308,7 +308,7 @@ async def on_message(message):
             heure = parse_time(times[nom])
             if now < heure:
                 prochaine = (nom, heure)
-            break
+                break
         if prochaine:
             await message.channel.send(f"La prochaine prière est **{prochaine[0]}** à {prochaine[1].strftime('%H:%M')}.")
         else:
