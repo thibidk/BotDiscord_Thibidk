@@ -213,7 +213,16 @@ async def get_random_hadith():
             texte = hadith.get("hadeeth", "Hadith inconnu.")
             source = hadith.get("attribution", "")
             return f"**Hadith :**\n{texte}\n\n*Source :* {source}"
-        
+
+async def get_hadith_categories():
+    url = "https://hadeethenc.com/api/v1/categories/list/?language=fr"
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as resp:
+            if resp.status != 200:
+                return "Impossible de récupérer les catégories."
+            data = await resp.json()
+            return data
+                
 # =============== DISCORD BOT ===============
 
 intents = discord.Intents.all()
@@ -319,7 +328,7 @@ async def on_message(message):
             await message.channel.send(reponse)
         return
     
-    if message.content.lower().startswith("!hadits"):
+    if message.content.lower().startswith("!hadith"):
         await message.channel.typing()
         hadith = await get_random_hadith()
         await message.channel.send(hadith)
