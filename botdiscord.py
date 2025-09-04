@@ -262,7 +262,7 @@ HADITHS_LOCAL = [
 ]
 
 async def get_random_hadith():
-    return f"🕌{random.choice(HADITHS_LOCAL)}"
+    return f"🕌 {random.choice(HADITHS_LOCAL)}"
 
 async def get_hadith_categories():
     url = "https://hadeethenc.com/api/v1/categories/list/?language=fr"
