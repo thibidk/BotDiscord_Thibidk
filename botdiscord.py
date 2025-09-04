@@ -204,16 +204,20 @@ async def get_random_hadith():
     url = "https://hadeethenc.com/api/v1/hadeeths/list/?language=fr&page=1&rowsPerPage=1&random=1"
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as resp:
-            if resp.status != 200:
+            log(f"Status API hadith: {resp.status}")
+            try:
+                data = await resp.json()
+                log(f"Réponse API hadith: {data}")
+            except Exception as e:
+                log(f"Erreur décodage JSON: {e}")
                 return "Impossible de récupérer un hadith pour le moment."
-            data = await resp.json()
             if not data or not data.get("data"):
                 return "Aucun hadith trouvé."
             hadith = data["data"][0]
             texte = hadith.get("hadeeth", "Hadith inconnu.")
             source = hadith.get("attribution", "")
             return f"**Hadith :**\n{texte}\n\n*Source :* {source}"
-
+        
 async def get_hadith_categories():
     url = "https://hadeethenc.com/api/v1/categories/list/?language=fr"
     async with aiohttp.ClientSession() as session:
