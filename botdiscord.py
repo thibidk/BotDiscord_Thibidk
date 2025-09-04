@@ -62,7 +62,7 @@ last_announced_game_ids = {}  # clé = puuid, valeur = gameId
 async def ask_gpt(prompt):
     try:
         response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4o",
             messages=[{"role": "user", "content": prompt}]
         )
         return response.choices[0].message.content.strip()
@@ -212,24 +212,27 @@ async def on_message(message):
     
     if isinstance(message.channel, discord.DMChannel):
         await message.channel.typing()
-        if message.attachments:
-            image_url = message.attachments[0].url
-            user_text = message.content if message.content else "Décris cette image"
-            response = openai.ChatCompletion.create(
-                model="gpt-4o",
-                messages=[
-                    {"role": "user", "content": [
-                        {"type": "text", "text": user_text},
-                        {"type": "image_url", "image_url": {"url": image_url}}
-                    ]}
-                ]
-            )
-            await message.channel.send(response.choices[0].message.content)
-            return
-        else:
-            reponse = await ask_gpt(message.content)
-            await message.channel.send(reponse)
-            return
+        try:
+            if message.attachments:
+                image_url = message.attachments[0].url
+                user_text = message.content if message.content else "Décris cette image"
+                response = openai.ChatCompletion.create(
+                    model="gpt-4o",
+                    messages=[
+                        {"role": "user", "content": [
+                            {"type": "text", "text": user_text},
+                            {"type": "image_url", "image_url": {"url": image_url}}
+                        ]}
+                    ]
+                )
+                await message.channel.send(response.choices[0].message.content)
+            else:
+                reponse = await ask_gpt(message.content)
+                await message.channel.send(reponse)
+        except Exception as e:
+            print(f"Erreur OpenAI DM : {e}")
+            await message.channel.send("Je n'ai pas pu répondre pour le moment.")
+        return
     
     contenu = message.content.lower()
     reponses = {
@@ -268,13 +271,13 @@ async def on_message(message):
         await message.channel.send(reponse)
         return
 
-    if message.content.strip().lower() == "!dé":
+    if "!dé" in message.content.lower():
         de1 = random.randint(1, 6)
         de2 = random.randint(1, 6)
         await message.channel.send(f"🎲 Tu as lancé : {de1} et {de2} !")
         return
-    
-    if message.content.strip().lower() == "!nombre":
+
+    if "!nombre" in message.content.lower():
         nombre = random.randint(1, 10)
         await message.channel.send(f"🔢 Le nombre aléatoire est : {nombre} !")
         return
