@@ -400,7 +400,7 @@ async def check_games():
                 queue_type = "Classée"
             elif queue_type == "ARAM":
                 queue_type = "ARAM"
-            elif queue_type == "ARENA":
+            elif queue_type == "CHERRY":
                 queue_type = "ARENA"
             elif queue_type == "RUBY":
                 queue_type = "DOOMBOT"
