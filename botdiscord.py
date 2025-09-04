@@ -14,7 +14,10 @@ import discord
 from dotenv import load_dotenv
 from champions import CHAMPION_NAME_TO_ID, CHAMPION_NAME_FIX
 
-print("Lancement du bot...")
+def log(msg):
+    print(f"[{datetime.datetime.now().strftime('%H:%M:%S')}] {msg}")
+
+log("Lancement du bot...")
 
 load_dotenv()
 RIOT_TOKEN = os.getenv('RIOT_TOKEN')
@@ -23,7 +26,7 @@ GAME_CHANNEL_ID = int(os.getenv('GAME_CHANNEL_ID'))
 GENERAL_CHANNEL_ID = int(os.getenv('GENERAL_CHANNEL_ID'))
 user_ids_raw = os.getenv('USER_IDS_TO_NOTIFY', '')
 USER_IDS_TO_NOTIFY = [int(uid.strip()) for uid in user_ids_raw.split(',') if uid.strip()]
-print("USER_IDS_TO_NOTIFY =", USER_IDS_TO_NOTIFY)  
+log(f"USER_IDS_TO_NOTIFY = {USER_IDS_TO_NOTIFY}")
 PRAYER_ADVANCE_MINUTES = 60
 
 # =============== DATACLASSES & JOUEURS ===============
@@ -55,9 +58,9 @@ async def fetch_puuids():
                 if response.status == 200:
                     data = await response.json()
                     player.puuid = data['puuid']
-                    print(f"{player.gameName}#{player.tagLine} → PUUID : {data['puuid']}")
+                    log(f"{player.gameName}#{player.tagLine} → PUUID : {data['puuid']}")
                 else:
-                    print(f"Erreur pour {player.gameName}#{player.tagLine} : {response.status} - {await response.text()}")
+                    log(f"Erreur pour {player.gameName}#{player.tagLine} : {response.status} - {await response.text()}")
 
 last_announced_game_ids = {}  # clé = puuid, valeur = gameId
 
@@ -71,7 +74,7 @@ async def ask_gpt(prompt):
         )
         return response.choices[0].message.content.strip()
     except Exception as e:
-        print(f"Erreur OpenAI : {e}")
+        log(f"Erreur OpenAI : {e}")
         return "Je n'ai pas pu répondre pour le moment."
 
 # =============== FONCTIONS LOL ===============
@@ -101,7 +104,7 @@ async def get_summoner_id(encryptedPUUID, region, riot_token):
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as resp:
             if resp.status != 200:
-                print(f"Erreur summonerId pour puuid={encryptedPUUID}: {resp.status}")
+                log(f"Erreur summonerId pour puuid={encryptedPUUID}: {resp.status}")
                 return None
             data = await resp.json()
             return data.get("id")
@@ -115,12 +118,12 @@ async def fetch_summoner_rank(player, region, riot_token):
     async with aiohttp.ClientSession() as session:
         async with session.get(url_summoner) as resp:
             if resp.status != 200:
-                print(f"Erreur summonerId pour {player.gameName}: {resp.status}")
+                log(f"Erreur summonerId pour {player.gameName}: {resp.status}")
                 return "Unranked"
             data = await resp.json()
             summoner_id = data.get("id")
             if not summoner_id:
-                print(f"Aucun summonerId trouvé pour {player.gameName}")
+                log(f"Aucun summonerId trouvé pour {player.gameName}")
                 return "Unranked"
 
         url_rank = (
@@ -129,7 +132,7 @@ async def fetch_summoner_rank(player, region, riot_token):
         )
         async with session.get(url_rank) as resp:
             if resp.status != 200:
-                print(f"Erreur league-v4 pour {player.gameName} : {resp.status}")
+                log(f"Erreur league-v4 pour {player.gameName} : {resp.status}")
                 return "Unranked"
             ranks = await resp.json()
             for entry in ranks:
@@ -155,7 +158,7 @@ async def fetch_winrate(puuid, champion_id, region, riot_token, max_matches=20):
     async with aiohttp.ClientSession() as session:
         async with session.get(url_matches) as resp:
             if resp.status != 200:
-                print(f"Erreur récupération des matchs : {resp.status}")
+                log(f"Erreur récupération des matchs : {resp.status}")
                 return "N/A"
             match_ids = await resp.json()
 
@@ -236,7 +239,7 @@ async def on_message(message):
                 reponse = await ask_gpt(message.content)
                 await message.channel.send(reponse)
         except Exception as e:
-            print(f"Erreur OpenAI DM : {e}")
+            log(f"Erreur OpenAI DM : {e}")
             await message.channel.send("Je n'ai pas pu répondre pour le moment.")
         return
     
@@ -436,7 +439,7 @@ async def check_games():
 
             await channel.send(embed=embed)
     except Exception as e:
-        print("Erreur dans check_games:", e)
+        log(f"Erreur dans check_games: {e}")
         
 
 @tasks.loop(minutes=1)
@@ -451,14 +454,14 @@ async def prayer_reminder():
                 continue
             prayer_time = parse_time(prayer_time_str)
             reminder_dt = (datetime.datetime.combine(now.date(), prayer_time) - datetime.timedelta(minutes=PRAYER_ADVANCE_MINUTES))
-            print(f"Pour {prayer}: rappel à {reminder_dt.strftime('%H:%M')}, il est {now.strftime('%H:%M')}")
+            log(f"Pour {prayer}: rappel à {reminder_dt.strftime('%H:%M')}, il est {now.strftime('%H:%M')}")
             if now.hour == reminder_dt.hour and now.minute == reminder_dt.minute:
                 for user_id in USER_IDS_TO_NOTIFY:
-                    print(f"Tentative d'envoi à {user_id}")
+                    log(f"Tentative d'envoi à {user_id}")
                     user = await client.fetch_user(user_id)
                     await user.send(f"⏰ Rappel : {prayer} dans {PRAYER_ADVANCE_MINUTES} minutes environ inshaAllah ! Regarde ton téléphone ")
     except Exception as e:
-        print("Erreur dans prayer_reminder:", e)
+        log(f"Erreur dans prayer_reminder: {e}")
 
 # =============== Mise à jour automatique du bot ===============
 
@@ -466,11 +469,11 @@ async def auto_update(interval_minutes=60):
     await asyncio.sleep(10)  
     while True:
         await asyncio.sleep(interval_minutes * 60)
-        print("Vérification des mises à jour...")
+        log("Vérification des mises à jour...")
         result = subprocess.run(['git', 'pull'], capture_output=True, text=True)
-        print(result.stdout)
+        log(result.stdout)
         if "Already up to date." not in result.stdout:
-            print("Mise à jour détectée, redémarrage du bot...")
+            log("Mise à jour détectée, redémarrage du bot...")
             os.execv(sys.executable, [sys.executable] + sys.argv)
 
 # =============== LANCEMENT DU BOT ===============
