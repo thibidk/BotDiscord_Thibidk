@@ -299,6 +299,21 @@ async def on_message(message):
             reponse = await ask_gpt(contenu)
             await message.channel.send(reponse)
         return
+    
+    if message.content.lower().startswith("!prière"):
+        times = await get_prayer_times_aladhan()
+        now = datetime.datetime.now().time()
+        prochaine = None
+        for nom in ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha']:
+            heure = parse_time(times[nom])
+            if now < heure:
+                prochaine = (nom, heure)
+            break
+        if prochaine:
+            await message.channel.send(f"La prochaine prière est **{prochaine[0]}** à {prochaine[1].strftime('%H:%M')}.")
+        else:
+            await message.channel.send("Toutes les prières d'aujourd'hui sont passées.")
+        return
 
     if "!dé" in message.content.lower():
         de1 = random.randint(1, 6)
