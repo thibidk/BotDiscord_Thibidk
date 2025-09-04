@@ -268,11 +268,22 @@ async def on_message(message):
         ]
         await message.channel.send(random.choice(reponses_ca_va))
         return
-
+    
+    if client.user in message.mentions and any(mot in contenu for mot in('c qui la plus grosse',"c'est qui la plus grosse","c'est qui le plus gros",'c qui le plus gros')):
+        reponses_qui = [
+            "C'est <@300644159566381060>,",
+        ]
+        await message.channel.send(random.choice(reponses_qui))
+        return
+    
     if client.user in message.mentions:
-        await message.channel.typing()
-        reponse = await ask_gpt(contenu)
-        await message.channel.send(reponse)
+   
+        if message.author.id == 300644159566381060 and random.random() < 0.10:
+            await message.channel.send("Couché le toutou")
+        else:
+            await message.channel.typing()
+            reponse = await ask_gpt(contenu)
+            await message.channel.send(reponse)
         return
 
     if "!dé" in message.content.lower():
@@ -288,6 +299,10 @@ async def on_message(message):
     
     # Réponses personnalisées par mots ou mentions
 
+    if client.user in message.mentions and message.author.id == 300644159566381060:
+        await message.channel.send("Oui ptit toutou")
+        return
+    
     if (
         any(mot in contenu for mot in ('goulth', 'pouyol', 'bouyol', 'groulth')) 
         or any(user.id == 206010121371779073 for user in message.mentions)
