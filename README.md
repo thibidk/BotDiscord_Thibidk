@@ -10,7 +10,7 @@ Ce bot Discord propose :
 - Chat IA avec OpenAI (texte et images, si tu as accès à GPT-4o via API openAI, attention il faut payer pour avoir des tokens sur votre key, le bot ne pourra pas fournir de réponse s'il n'y a pas de token)
 - Rappel des horaires de prières (Strasbourg mais reste modidifiable)
 - Réponses aux messages privés (texte et images)
-- Commandes diverses comme `!dé` pour lancer deux dés aléatoires.
+- Commandes diverses comme `!dé` ou `!nombre` qui génère un résultat au hasard
 
 ---
 
