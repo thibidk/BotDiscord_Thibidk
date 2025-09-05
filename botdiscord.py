@@ -105,7 +105,6 @@ async def get_summoner_id(encryptedPUUID, region, riot_token):
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as resp:
             if resp.status != 200:
-                log(f"Erreur summonerId pour puuid={encryptedPUUID}: {resp.status}")
                 return None
             data = await resp.json()
             return data.get("id")
@@ -473,8 +472,8 @@ async def prayer_reminder():
                 continue
             prayer_time = parse_time(prayer_time_str)
             reminder_dt = (datetime.datetime.combine(now.date(), prayer_time) - datetime.timedelta(minutes=PRAYER_ADVANCE_MINUTES))
-            log(f"Pour {prayer}: rappel à {reminder_dt.strftime('%H:%M')}, il est {now.strftime('%H:%M')}")
             if now.hour == reminder_dt.hour and now.minute == reminder_dt.minute:
+                log(f"Pour {prayer}: rappel à {reminder_dt.strftime('%H:%M')}, il est {now.strftime('%H:%M')}")
                 for user_id in USER_IDS_TO_NOTIFY:
                     log(f"Tentative d'envoi à {user_id}")
                     user = await client.fetch_user(user_id)
@@ -491,6 +490,7 @@ async def daily_hadith():
         for user_id in USER_IDS_TO_NOTIFY:  
             hadith = random.choice(HADITHS_LOCAL)
             user = await client.fetch_user(user_id)
+            log(f"Envoi du hadith à {user_id} à {now.strftime('%H:%M')}")
             await user.send(f"🕌 {hadith}")
 
 @client.event
