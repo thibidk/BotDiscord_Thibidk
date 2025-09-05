@@ -8,10 +8,10 @@ import openai
 import subprocess
 import sys
 import asyncio
-import http.client
+import discord
 from dataclasses import dataclass
 from discord.ext import tasks
-import discord
+from hadiths import HADITHS_LOCAL
 from dotenv import load_dotenv
 from champions import CHAMPION_NAME_TO_ID, CHAMPION_NAME_FIX
 
@@ -199,67 +199,6 @@ async def get_prayer_times_aladhan():
 
 def parse_time(time_str):
     return datetime.datetime.strptime(time_str, "%H:%M").time()
-
-HADITHS_LOCAL = [
-    "**Sur les intentions**\nLes actions ne valent que par les intentions, et chacun n’aura que ce qu’il a eu l’intention de faire. Celui qui émigre pour Allah et Son Messager, alors son émigration est pour Allah et Son Messager ; et celui qui émigre pour obtenir un bien de ce monde ou pour épouser une femme, alors son émigration est pour ce vers quoi il a émigré. *Rapporté par al-Bukhârî (n°1) et Muslim (n°1907)*",
-    "**Sur le Coran**\nLe meilleur d’entre vous est celui qui apprend le Coran et l’enseigne. *Rapporté par al-Bukhârî (n°5027)*",
-    "**Sur le conseil**\nLa religion est le conseil (an-nasîha). » Nous dîmes : « Envers qui ? » Il répondit : « Envers Allah, Son Livre, Son Messager, les dirigeants des musulmans et l’ensemble de la communauté. *Rapporté par Muslim (n°55)*",
-    "**Sur l’amour pour son frère**\nAucun de vous ne croit vraiment jusqu’à ce qu’il aime pour son frère ce qu’il aime pour lui-même. *Rapporté par al-Bukhârî (n°13) et Muslim (n°45)*",
-    "**Sur la parole et le silence**\nQue celui qui croit en Allah et au Jour dernier dise du bien ou qu’il se taise ; que celui qui croit en Allah et au Jour dernier soit généreux envers son voisin ; et que celui qui croit en Allah et au Jour dernier honore son hôte. *Rapporté par al-Bukhârî (n°6018) et Muslim (n°47)*",
-    "**Sur l’intention**\nLes actions ne valent que par les intentions, et chacun n’aura que ce qu’il a eu l’intention de faire. *Rapporté par al-Bukhârî (n°1) et Muslim (n°1907)*",
-    "**Sur la facilité dans la religion**\nLa religion est facile, et personne ne cherche à être dur dans la religion sans que cela ne le dépasse. *Rapporté par al-Bukhârî (n°39)(Hasan)*",
-    "**Sur le bon comportement**\nLe croyant le plus parfait dans sa foi est celui qui a le meilleur caractère. *Rapporté par at-Tirmidhî (n°1162), authentifié par al-Albânî*",
-    "**Sur l’amour entre musulmans**\nAucun de vous ne croit vraiment jusqu’à ce qu’il aime pour son frère ce qu’il aime pour lui-même. *Rapporté par al-Bukhârî (n°13) et Muslim (n°45)*",
-    "**Sur le sourire**\nVotre sourire à votre frère est une aumône. *Rapporté par at-Tirmidhî (n°1956), authentifié par al-Albânî*",
-    "**Sur la miséricorde**\nCeux qui sont miséricordieux, le Tout-Miséricordieux leur fera miséricorde. Soyez miséricordieux envers ceux qui sont sur terre, et Celui qui est au ciel sera miséricordieux envers vous. *Rapporté par at-Tirmidhî (n°1924), authentifié par al-Albânî*",
-    "**Sur la prière (Salât)**\nLa clé du Paradis est la prière. *Rapporté par Ahmad (n°14694), authentifié par al-Albânî*",
-    "**Sur la prière en groupe (Salât)**\nLa prière en groupe vaut vingt-sept fois la prière accomplie individuellement. *Rapporté par al-Bukhârî (n°645) et Muslim (n°650)*",
-    "**Sur la sincérité (Ikhlâs)**\nCelui qui fait l’aumône de l’équivalent d’une datte provenant d’un bien licite, Allah l’accepte dans Sa main droite puis la fait croître pour son auteur, comme l’un de vous fait croître son poulain, jusqu’à ce qu’elle devienne comme une montagne. *Rapporté par al-Bukhârî (n°1410) et Muslim (n°1014)*",
-    "**Sur le comportement**\nLe plus aimé des gens auprès d’Allah est celui qui est le plus utile aux autres. *Rapporté par at-Tabarânî dans al-Mu‘jam al-Kabîr (n°13280), authentifié par al-Albânî*",
-    "**Sur le comportement**\nLe fort n’est pas celui qui terrasse les gens, mais le fort est celui qui se maîtrise lorsqu’il est en colère. *Rapporté par al-Bukhârî (n°6114) et Muslim (n°2609)*",
-    "**Sur l’invocation (Du‘â)**\nL’invocation est l’essence de l’adoration. Rapporté par at-Tirmidhî (n°3371), *authentifié par al-Albânî*",
-    "**Sur l'invocation (Du‘â)**\nIl n’y a rien de plus noble auprès d’Allah que l’invocation. *Rapporté par Ahmad (n°11975), authentifié par al-Albânî*",
-    "**Sur la vie d’ici-bas (Dounya)**\nLe bas-monde est une prison pour le croyant et un paradis pour le mécréant. *Rapporté par Muslim (n°2956)*",
-    "**Sur la vie d’ici-bas (Dounya)**\nProfite de cinq choses avant cinq autres : ta jeunesse avant ta vieillesse, ta santé avant ta maladie, ta richesse avant ta pauvreté, ton temps libre avant ton occupation, et ta vie avant ta mort. *Rapporté par al-Hâkim (n°7846), authentifié par al-Albânî(Hasan)*",
-    "**Sur les liens entre musulmans**\nLe musulman est le frère du musulman : il ne l’opprime pas, il ne l’abandonne pas et il ne le méprise pas. *Rapporté par Muslim (n°2564)*",
-    "**Sur les liens entre musulmans**\nCelui qui soulage un croyant d’une difficulté d’ici-bas, Allah le soulagera d’une difficulté le Jour de la Résurrection. *Rapporté par Muslim (n°2699)*",
-    "**Sur la miséricorde et la bonté**\nCelui qui ne fait pas miséricorde, on ne lui fera pas miséricorde. *Rapporté par al-Bukhârî (n°6013) et Muslim (n°2319)*",
-    "**Sur la miséricorde et la bonté**\nEn vérité, Allah est doux et Il aime la douceur dans toutes les affaires. *Rapporté par al-Bukhârî (n°6024) et Muslim (n°2165)*",
-    "**Sur la colère**\nLe fort n’est pas celui qui terrasse les gens, mais le fort est celui qui se maîtrise lorsqu’il est en colère. *Rapporté par al-Bukhârî (n°6114) et Muslim (n°2609)*"
-    "**Sur la patience avec les gens**\nLe croyant qui se mêle aux gens et patiente face à leurs torts est meilleur que celui qui ne se mêle pas aux gens et ne patiente pas face à leurs torts. *Rapporté par Ibn Mâjah (n°4032), authentifié par al-Albânî*"
-    "**Sur la vie d’ici-bas**\nLe bas-monde est une prison pour le croyant et un paradis pour le mécréant. *Rapporté par Muslim (n°2956)*"
-    "**Sur la constance dans les actes** Les œuvres les plus aimées d’Allah sont celles qui sont accomplies régulièrement, même si elles sont peu nombreuses. *Rapporté par al-Bukhârî (n°6464) et Muslim (n°783)*",
-    "**Sur le sourire**\nNe méprise aucune bonne action, même si c’est de rencontrer ton frère avec un visage souriant. *Rapporté par Muslim (n°2626)*"
-    "**Sur le fait de guider vers le bien**\nCelui qui appelle à une bonne guidée aura la même récompense que ceux qui la suivent, sans que cela ne diminue en rien leur récompense. Et celui qui appelle à une mauvaise guidée portera le fardeau de ceux qui la suivent, sans que cela ne diminue en rien leur fardeau. *Rapporté par Muslim (n°2674)*",
-    "**Sur la facilité en religion**\nFacilitez et ne rendez pas les choses difficiles. Annoncez la bonne nouvelle et ne repoussez pas les gens. *Rapporté par al-Bukhârî (n°69) et Muslim (n°1734)*",
-    "**Sur la miséricorde**\nCeux qui sont miséricordieux, le Tout-Miséricordieux leur fera miséricorde. Soyez miséricordieux envers ceux qui sont sur terre, et Celui qui est au ciel sera miséricordieux envers vous. *Rapporté par at-Tirmidhî (n°1924), authentifié par al-Albânî*",
-    "**Sur la reconnaissance envers les gens**\nCelui qui ne remercie pas les gens, ne remercie pas Allah. *Rapporté par Abû Dâwûd (n°4811) et at-Tirmidhî (n°1954), authentifié par al-Albânî*",
-    "**Sur la définition du musulman**\nLe musulman est celui dont les musulmans sont à l’abri de sa langue et de sa main. Et l’émigré (al-muhâjir) est celui qui délaisse ce qu’Allah a interdit. *Rapporté par al-Bukhârî (n°10) et Muslim (n°40)*",
-    "**Sur la sincérité**\nAllah n’accepte une action que si elle est sincèrement pour Lui, et la sincérité est dans le cœur et l’intention. *Rapporté par Muslim (n°1907)*",
-    "**Sur la générosité**\nLe meilleur des hommes est celui qui est le plus utile aux gens. *Rapporté par at-Tabarânî dans al-Mu‘jam al-Kabîr (n°13280), authentifié par al-Albânî*",
-    "**Sur la miséricorde envers les enfants**\nCelui qui n’est pas miséricordieux envers les enfants et ne respecte pas les aînés, n’est pas des nôtres. *Rapporté par Ahmad (n°22018), authentifié par al-Albânî(Hasan)*",
-    "**Sur l’aumône**\nL’aumône ne diminue pas la richesse. *Rapporté par Muslim (n°2588)*",
-    "**Sur le comportement envers les voisins**\nCelui qui croit en Allah et au Jour dernier, qu’il honore son voisin. *Rapporté par al-Bukhârî (n°6019) & Muslim (n°47)*",
-    "**Sur la patience**\nCelui qui endure patiemment ce qui lui déplaît, Allah l’aidera face à ce qu’il aime et ce qu’il craint. *Rapporté par al-Bukhârî (n°5640) & Muslim (n°120)(Hasan)*",
-    "**Sur la fraternité**\nAucun d’entre vous n’est croyant tant qu’il n’aime pas pour son frère ce qu’il aime pour lui-même. *Rapporté par al-Bukhârî (n°13) & Muslim (n°45)*",
-    "**Sur l’importance de la prière**\nLa prière est la clé du Paradis et le pilier de la religion. *Rapporté par Ahmad (n°14694), authentifié par al-Albânî*",
-    "**Sur la constance**\nFaites des actions en proportion de vos capacités. Les actions les plus aimées d’Allah sont celles qui sont constantes même si elles sont peu nombreuses. *Rapporté par Muslim (n°783)*",
-    "**Sur la vérité et l’honnêteté**\nCelui qui ment n’est pas des nôtres. *Rapporté par Muslim (n°2607)*",
-    "**Sur le traitement des femmes**\nLes meilleurs d’entre vous sont les meilleurs pour leurs femmes. *Rapporté par at-Tirmidhî (n°1162), authentifié par al-Albânî*",
-    "**Sur l’entraide**\nLe croyant pour le croyant est comme un édifice dont chaque partie renforce l’autre. *Rapporté par al-Bukhârî (n°2449) & Muslim (n°2587)*",
-    "**Sur la peur d’Allah**\nLa foi ne sera complète tant que l’homme n’aura pas peur d’Allah dans son cœur. *Rapporté par al-Bukhârî (n°50)(Formulation pédagogique)*",
-    "**Sur l’importance de la parole**\nCelui qui croit en Allah et au Jour dernier doit dire du bien ou se taire. *Rapporté par al-Bukhârî (n°6018) & Muslim (n°47)*",
-    "**Sur l’humilité**\nNul ne sera élevé par Allah s’il est orgueilleux et hautain. *Rapporté par Muslim (n°91)*",
-    "**Sur la miséricorde**\nSoyez miséricordieux envers les habitants de la terre, Celui qui est au ciel sera miséricordieux envers vous. *Rapporté par at-Tirmidhî (n°1924), authentifié par al-Albânî*",
-    "**Sur l’aumône et le sourire**\nRencontrer ton frère avec un sourire est une aumône. *Rapporté par Muslim (n°2626)*",
-    "**Sur le comportement juste**\nLe meilleur des hommes est celui qui a le meilleur caractère. *Rapporté par at-Tirmidhî (n°1162), authentifié par al-Albânî*",
-    "**Sur la miséricorde envers les faibles**\nCelui qui est miséricordieux envers les faibles, Allah lui fera miséricorde. *Rapporté par Ahmad (n°21935)(Hasan)*",
-    "**Sur le respect des aînés**\nCelui qui ne respecte pas nos anciens n’est pas des nôtres. *Rapporté par Ahmad (n°22018), authentifié par al-Albânî(Hasan)*",
-    "**Sur la foi et les actions**\nLa foi est composée de soixante et quelques branches, la plus haute est dire “La ilaha illa Allah” et la plus basse est enlever une nuisance de la voie publique. *Rapporté par Muslim (n°35)*",
-    "**Sur la modération**\nSoyez modérés dans tout ce que vous faites. *Rapporté par Muslim (n°2346)*",
-    "**Sur l’importance des parents**\nLe paradis se trouve sous les pieds de la mère. *Rapporté par Ahmad (n°25435) & an-Nasâ’î(Hasan)*",
-    "**Sur la gratitude**\nCelui qui ne remercie pas les gens ne remercie pas Allah. *Rapporté par Abû Dâwûd (n°4811), authentifié par al-Albânî*",  
-]
 
 async def get_random_hadith():
     return f"🕌 {random.choice(HADITHS_LOCAL)}"
@@ -457,7 +396,7 @@ async def on_message(message):
             await message.channel.send(reponses[contenu])
         return
 
-# =============== TASKS LOOPS ===============
+# =============== Loop Lol ===============
 @tasks.loop(minutes=3)
 async def check_games():
     try:
@@ -521,7 +460,7 @@ async def check_games():
     except Exception as e:
         log(f"Erreur dans check_games: {e}")
         
-
+# =============== Loop prière ===============
 @tasks.loop(minutes=1)
 async def prayer_reminder():
     try:
@@ -542,6 +481,28 @@ async def prayer_reminder():
                     await user.send(f"⏰ Rappel : {prayer} dans {PRAYER_ADVANCE_MINUTES} minutes environ inshaAllah ! Regarde ton téléphone ")
     except Exception as e:
         log(f"Erreur dans prayer_reminder: {e}")
+
+# =============== Loop Hadith ===============
+
+@tasks.loop(minutes=1)
+async def daily_hadith():
+    now = datetime.datetime.now()
+    if now.hour == 8 and now.minute == 0:
+        for user_id in USER_IDS_TO_NOTIFY:  
+            hadith = random.choice(HADITHS_LOCAL)
+            user = await client.fetch_user(user_id)
+            await user.send(f"🕌 {hadith}")
+
+@client.event
+async def on_ready():
+    await fetch_puuids()
+    if not check_games.is_running():
+        check_games.start()
+    if not prayer_reminder.is_running():
+        prayer_reminder.start()
+    if not daily_hadith.is_running():
+        daily_hadith.start()
+    asyncio.create_task(auto_update())
 
 # =============== Mise à jour automatique du bot ===============
 
