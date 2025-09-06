@@ -27,7 +27,8 @@ GAME_CHANNEL_ID = int(os.getenv('GAME_CHANNEL_ID'))
 GENERAL_CHANNEL_ID = int(os.getenv('GENERAL_CHANNEL_ID'))
 user_ids_raw = os.getenv('USER_IDS_TO_NOTIFY', '')
 USER_IDS_TO_NOTIFY = [int(uid.strip()) for uid in user_ids_raw.split(',') if uid.strip()]
-log(f"USER_IDS_TO_NOTIFY = {USER_IDS_TO_NOTIFY}")
+user_ids_hadith_raw = os.getenv('USER_IDS_HADITH', '')
+USER_IDS_HADITH = [int(uid.strip()) for uid in user_ids_hadith_raw.split(',') if uid.strip()]
 PRAYER_ADVANCE_MINUTES = 60
 
 # =============== DATACLASSES & JOUEURS ===============
@@ -487,7 +488,7 @@ async def prayer_reminder():
 async def daily_hadith():
     now = datetime.datetime.now()
     if now.hour == 8 and now.minute == 0:
-        for user_id in USER_IDS_TO_NOTIFY:  
+        for user_id in USER_IDS_HADITH:
             hadith = random.choice(HADITHS_LOCAL)
             user = await client.fetch_user(user_id)
             log(f"Envoi du hadith à {user_id} à {now.strftime('%H:%M')}")
