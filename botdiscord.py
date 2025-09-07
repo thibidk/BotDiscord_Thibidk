@@ -362,12 +362,8 @@ async def on_message(message):
     if message.content.lower().startswith("!sourate"):
         await message.channel.typing()
         titre, ayah_texts, full_texts, surah_number = await get_random_surah()
-        if ayah_texts == full_texts:
-            await message.channel.send(f"{titre} (N°{surah_number})\n{full_texts}")
-        else:
-            await message.channel.send(f"{titre}\n{ayah_texts}")
-            for part in split_message(f"{titre} (N°{surah_number})\n{full_texts}"):
-                await message.channel.send(part)
+        for part in split_message(f"{titre} (N°{surah_number})\n{full_texts}"):
+            await message.channel.send(part)
         return
 
     if message.content.lower().startswith("!hadith"):
