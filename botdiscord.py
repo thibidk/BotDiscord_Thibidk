@@ -1,4 +1,5 @@
 # =============== IMPORTS & VARIABLES ===============
+from email.mime import message, text
 import os
 import random
 import datetime
@@ -355,11 +356,15 @@ async def on_message(message):
         await message.channel.send(ayah)
         return
 
+    def split_message(text, max_length=4000):
+        return [text[i:i+max_length] for i in range(0, len(text), max_length)]
+
     if message.content.lower().startswith("!sourate"):
         await message.channel.typing()
         titre, ayah_texts, full_texts, surah_number = await get_random_surah()
-        await message.channel.send(f"{titre}(N°{surah_number})\n{ayah_texts}")
-        await message.channel.send(f"{full_texts}")
+        await message.channel.send(f"{titre}\n{ayah_texts}")
+        for part in split_message(f"{titre} (N°{surah_number})\n{full_texts}"):
+            await message.channel.send(part)
         return
 
     if message.content.lower().startswith("!hadith"):
