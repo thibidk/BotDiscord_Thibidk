@@ -240,7 +240,7 @@ async def get_random_surah(edition="fr.hamidullah"):
             ayah_texts = "\n".join([f"{a['numberInSurah']}. {a['text']}" for a in ayahs[:5]])
             full_texts = "\n".join([f"{a['numberInSurah']}. {a['text']}" for a in ayahs])
             titre = f"**{name_fr} ({name})**"
-            return titre, ayah_texts, full_texts
+            return titre, ayah_texts, full_texts, surah_number
 
 # =============== DISCORD BOT ===============
 
@@ -357,9 +357,9 @@ async def on_message(message):
 
     if message.content.lower().startswith("!sourate"):
         await message.channel.typing()
-        titre, ayah_texts, full_texts = await get_random_surah()
-        await message.channel.send(f"{titre}\n{ayah_texts}\n... (voir tout sur https://alquran.cloud/surah/)")
-        await message.channel.send(f"{titre}\n{full_texts}")
+        titre, ayah_texts, full_texts, surah_number = await get_random_surah()
+        await message.channel.send(f"{titre}(N°{surah_number})\n{ayah_texts}")
+        await message.channel.send(f"{full_texts}")
         return
 
     if message.content.lower().startswith("!hadith"):
