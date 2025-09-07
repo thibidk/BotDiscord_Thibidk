@@ -188,7 +188,7 @@ async def fetch_winrate(puuid, champion_id, region, riot_token, max_matches=20):
         loses = total - wins
         return f"{winrate}% ({wins}/{loses})"
 
-# =============== FONCTIONS PRIÈRES & Hadith ===============
+# =============== FONCTIONS PRIÈRES & Hadiths & versets ===============
 
 async def get_prayer_times_aladhan():
     url = "https://api.aladhan.com/v1/timingsByCity?city=Strasbourg&country=France&method=2"
@@ -211,6 +211,19 @@ async def get_hadith_categories():
                 return "Impossible de récupérer les catégories."
             data = await resp.json()
             return data
+        
+async def get_random_ayah(edition="fr.hamidullah"):
+    url = f"https://api.alquran.cloud/v1/ayah/random/{edition}"
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as resp:
+            if resp.status != 200:
+                return "Impossible de récupérer un verset pour le moment."
+            data = await resp.json()
+            ayah = data.get("data", {})
+            texte = ayah.get("text", "Verset inconnu.")
+            sourate = ayah.get("surah", {}).get("englishName", "")
+            numero = ayah.get("numberInSurah", "")
+            return f"**{sourate} [{numero}]**\n{texte}"
                 
 # =============== DISCORD BOT ===============
 
@@ -225,6 +238,8 @@ async def on_ready():
     if not prayer_reminder.is_running():
         prayer_reminder.start()
     asyncio.create_task(auto_update()) 
+    if not daily_ayah.is_running():
+        daily_ayah.start()
 
 @client.event
 async def on_message(message):
@@ -317,6 +332,12 @@ async def on_message(message):
             await message.channel.send(reponse)
         return
     
+    if message.content.lower().startswith("!verset"):
+        await message.channel.typing()
+        ayah = await get_random_ayah()
+        await message.channel.send(ayah)
+        return
+
     if message.content.lower().startswith("!hadith"):
         await message.channel.typing()
         hadith = await get_random_hadith()
@@ -504,6 +525,16 @@ async def on_ready():
     if not daily_hadith.is_running():
         daily_hadith.start()
     asyncio.create_task(auto_update())
+
+# =============== Loop Versets ===============
+
+@tasks.loop(minutes=1)
+async def daily_ayah():
+    now = datetime.datetime.now()
+    if now.hour == 8 and now.minute == 0:
+        channel = await client.fetch_channel(GENERAL_CHANNEL_ID)
+        ayah = await get_random_ayah()
+        await channel.send(f"🕌 {ayah}")
 
 # =============== Mise à jour automatique du bot ===============
 
