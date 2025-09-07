@@ -188,7 +188,7 @@ async def fetch_winrate(puuid, champion_id, region, riot_token, max_matches=20):
         loses = total - wins
         return f"{winrate}% ({wins}/{loses})"
 
-# =============== FONCTIONS PRIÈRES & Hadiths & versets ===============
+# =============== FONCTIONS PRIÈRES & Hadiths & versets & sourates ===============
 
 async def get_prayer_times_aladhan():
     url = "https://api.aladhan.com/v1/timingsByCity?city=Strasbourg&country=France&method=2"
@@ -224,7 +224,24 @@ async def get_random_ayah(edition="fr.hamidullah"):
             sourate = ayah.get("surah", {}).get("englishName", "")
             numero = ayah.get("numberInSurah", "")
             return f"**{sourate} [{numero}]**\n{texte}"
-                
+        
+async def get_random_surah(edition="fr.hamidullah"):
+    surah_number = random.randint(1, 114)
+    url = f"https://api.alquran.cloud/v1/surah/{surah_number}/{edition}"
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as resp:
+            if resp.status != 200:
+                return "Impossible de récupérer une sourate pour le moment."
+            data = await resp.json()
+            surah = data.get("data", {})
+            name = surah.get("englishName", "Nom inconnu")
+            name_fr = surah.get("name", "")
+            ayahs = surah.get("ayahs", [])
+            ayah_texts = "\n".join([f"{a['numberInSurah']}. {a['text']}" for a in ayahs[:5]])
+            full_texts = "\n".join([f"{a['numberInSurah']}. {a['text']}" for a in ayahs])
+            titre = f"**{name_fr} ({name})**"
+            return titre, ayah_texts, full_texts
+
 # =============== DISCORD BOT ===============
 
 intents = discord.Intents.all()
@@ -336,6 +353,13 @@ async def on_message(message):
         await message.channel.typing()
         ayah = await get_random_ayah()
         await message.channel.send(ayah)
+        return
+
+    if message.content.lower().startswith("!sourate"):
+        await message.channel.typing()
+        titre, ayah_texts, full_texts = await get_random_surah()
+        await message.channel.send(f"{titre}\n{ayah_texts}\n... (voir tout sur https://alquran.cloud/surah/)")
+        await message.channel.send(f"{titre}\n{full_texts}")
         return
 
     if message.content.lower().startswith("!hadith"):
@@ -515,6 +539,30 @@ async def daily_hadith():
             log(f"Envoi du hadith à {user_id} à {now.strftime('%H:%M')}")
             await user.send(f"🕌 {hadith}")
 
+# =============== Loop Versets ===============
+
+@tasks.loop(minutes=1)
+async def daily_ayah():
+    now = datetime.datetime.now()
+    if now.hour == 8 and now.minute == 0:
+        ayah = await get_random_ayah()
+        for user_id in USER_IDS_HADITH:
+            user = await client.fetch_user(user_id)
+            log(f"Envoi du verset à {user_id} à {now.strftime('%H:%M')}")
+            await user.send(f"🕌 {ayah}")
+
+# =============== Loop Sourates ===============
+
+@tasks.loop(minutes=1)
+async def daily_surah():
+    now = datetime.datetime.now()
+    if now.hour == 8 and now.minute == 0:
+        surah = await get_random_surah()
+        for user_id in USER_IDS_HADITH:
+            user = await client.fetch_user(user_id)
+            log(f"Envoi de la sourate à {user_id} à {now.strftime('%H:%M')}")
+            await user.send(f"🕌 {surah}")
+
 @client.event
 async def on_ready():
     await fetch_puuids()
@@ -524,17 +572,9 @@ async def on_ready():
         prayer_reminder.start()
     if not daily_hadith.is_running():
         daily_hadith.start()
+    if not daily_surah.is_running():
+        daily_surah.start()
     asyncio.create_task(auto_update())
-
-# =============== Loop Versets ===============
-
-@tasks.loop(minutes=1)
-async def daily_ayah():
-    now = datetime.datetime.now()
-    if now.hour == 8 and now.minute == 0:
-        channel = await client.fetch_channel(GENERAL_CHANNEL_ID)
-        ayah = await get_random_ayah()
-        await channel.send(f"🕌 {ayah}")
 
 # =============== Mise à jour automatique du bot ===============
 
