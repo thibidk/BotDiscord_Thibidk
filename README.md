@@ -1,4 +1,4 @@
-# Bot Discord Multi-Fonctions (LoL, OpenAI, Prières, etc.)
+# Bot Discord Multi-Fonctions (LoL, OpenAI, Prières, Rappels, Sourates etc..)
 
 ## Description
 
@@ -10,9 +10,9 @@ Ce bot Discord propose :
 - Chat IA avec OpenAI (texte et images, si tu as accès à GPT-4o via API openAI, attention il faut payer pour avoir des tokens sur votre key, le bot ne pourra pas fournir de réponse s'il n'y a pas de token)
 - Rappel des horaires de prières 1h avant, le temps du rappel ainsi que le lieu peuvent être modifier (actuellement horaire de Strasbourg), commande !prière pour savoir à quelle heure est la prochaine prière
 - Réponses aux messages privés (texte et images)
-- Commandes diverses comme `!dé` ou `!nombre` qui génère un résultat au hasard
 - Commandes `!hadith`, `!sourate`, `!verset`, envoie au hasard ce qui est demandé
 - Fonction permettant de recevoir tous les matins (modifiable), un hadith, une sourate, un verset du Qur'an au hasard
+- Commandes diverses comme `!dé` ou `!nombre` qui génère un résultat au hasard
 
 ---
 
@@ -83,7 +83,7 @@ Ou run directement avec le bouton sur VCS
 - **Suivi LoL** : Annonce automatiquement quand un joueur de la liste lance une partie avec affichage de la queue, le champion, le winrate...
 - **!verset, !sourate** : Permet d'avoir un verset ou une sourate aléatoire du Qur'an
 - **Rappel verset et sourate** : Reçoit un verset et/ou une sourate du Qur'an à une heure précise de la journée
-- - **Commande fun !dé ou !nombre** : Afin d'obtenir un résultat aléatoire 
+- **Commande fun !dé ou !nombre** : Afin d'obtenir un résultat aléatoire 
 ---
 
 ## Dépendances
@@ -103,7 +103,7 @@ Comme dis plus haut,
 - Pour l’API Riot, la clé de développement doit être régénérée toutes les 24h (sauf clé production).
 - Pour l’hébergement 24/7, utilise un VPS ou un service cloud.
 - Pense à bien mettre les noms d'invocateurs+# des gens que te veux suivre
-- Si le bot run sur un serveur attantion à ce que l'heure du serveur soit bien la même que la tienne sinon le rappel sera en décalé
+- Si le bot run sur un serveur attention à ce que l'heure du serveur soit bien la même que la tienne sinon le rappel sera en décalé
 
 ## Auteur
 Leclerc Thibault

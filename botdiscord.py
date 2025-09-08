@@ -35,6 +35,15 @@ user_ids_islam_raw = os.getenv('USER_IDS_ISLAM', '')
 USER_IDS_ISLAM = [int(uid.strip()) for uid in user_ids_islam_raw.split(',') if uid.strip()]
 PRAYER_ADVANCE_MINUTES = 60
 
+COMMAND_STATS = {
+    "hadith": 0,
+    "verset": 0,
+    "sourate": 0,
+    "dé": 0,
+    "nombre": 0,
+    "prière": 0,
+}
+
 # =============== DATACLASSES & JOUEURS ===============
 @dataclass
 class Player:
@@ -354,25 +363,29 @@ async def on_message(message):
         return
     
     if message.content.lower().startswith("!verset"):
+        COMMAND_STATS["verset"] += 1
         await message.channel.typing()
         ayah = await get_random_ayah()
         await message.channel.send(ayah)
         return
 
     if message.content.lower().startswith("!sourate"):
+        COMMAND_STATS["sourate"] += 1
         await message.channel.typing()
-        titre, ayah_texts, full_texts, surah_number = await get_random_surah()
+        titre, full_texts, surah_number = await get_random_surah()
         for part in split_message(f"{titre} (N°{surah_number})\n{full_texts}"):
             await message.channel.send(part)
         return
 
     if message.content.lower().startswith("!hadith"):
+        COMMAND_STATS["hadith"] += 1
         await message.channel.typing()
         hadith = await get_random_hadith()
         await message.channel.send(hadith)
         return
 
     if message.content.lower().startswith("!prière"):
+        COMMAND_STATS["prière"] += 1
         times = await get_prayer_times_aladhan()
         now = datetime.datetime.now().time()
         prochaine = None
@@ -388,12 +401,14 @@ async def on_message(message):
         return
 
     if "!dé" in message.content.lower():
+        COMMAND_STATS["dé"] += 1
         de1 = random.randint(1, 6)
         de2 = random.randint(1, 6)
         await message.channel.send(f"🎲 Tu as lancé : {de1} et {de2} !")
         return
 
     if "!nombre" in message.content.lower():
+        COMMAND_STATS["nombre"] += 1
         nombre = random.randint(1, 10)
         await message.channel.send(f"🔢 Le nombre aléatoire est : {nombre} !")
         return
