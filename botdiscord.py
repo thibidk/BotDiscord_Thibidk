@@ -611,4 +611,5 @@ async def auto_update(interval_minutes=60):
             os.execv(sys.executable, [sys.executable] + sys.argv)
 
 # =============== LANCEMENT DU BOT ===============
-client.run(os.getenv('DISCORD_TOKEN'))
+if __name__ == "__main__":
+    client.run(os.getenv('DISCORD_TOKEN'))
