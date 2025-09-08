@@ -579,7 +579,37 @@ async def on_message(message):
         await message.channel.send(f"🔢 Le nombre aléatoire est : {nombre} !")
         return
     
-    if message.content.lower().startswith("!stats"):
+    if message.content.lower().startswith("!statsdé"):
+        target_user = message.mentions[0] if message.mentions else message.author
+        top_dice = get_top_dice_pairs(target_user.id)
+        embed = discord.Embed(
+            title=f"Top 5 paires de dés pour {target_user.display_name}",
+            color=discord.Color.green()
+        )
+        if top_dice:
+            for pair, count in top_dice:
+                embed.add_field(name=f"🎲 {pair}", value=f"{count} fois", inline=True)
+        else:
+            embed.add_field(name="Aucun résultat", value="Pas de lancer de dé enregistré.", inline=False)
+        await message.channel.send(embed=embed)
+        return
+
+    elif message.content.lower().startswith("!statsnombre"):
+        target_user = message.mentions[0] if message.mentions else message.author
+        top_number = get_top_number(target_user.id)
+        embed = discord.Embed(
+            title=f"Top 5 nombres pour {target_user.display_name}",
+            color=discord.Color.orange()
+        )
+        if top_number:
+            for result, count in top_number:
+                embed.add_field(name=f"🔢 {result}", value=f"{count} fois", inline=True)
+        else:
+            embed.add_field(name="Aucun résultat", value="Pas de nombre enregistré.", inline=False)
+        await message.channel.send(embed=embed)
+        return
+    
+    elif message.content.lower().startswith("!stats"):
         if message.mentions:
             target_user = message.mentions[0]
         else:
@@ -599,37 +629,6 @@ async def on_message(message):
             embed.add_field(name="Aucune commande utilisée", value="Cet utilisateur n'a pas encore utilisé de commande.", inline=False)
         await message.channel.send(embed=embed)
         return
-
-    if message.content.lower().startswith("!statsdé"):
-        target_user = message.mentions[0] if message.mentions else message.author
-        top_dice = get_top_dice_pairs(target_user.id)
-        embed = discord.Embed(
-            title=f"Top 5 paires de dés pour {target_user.display_name}",
-            color=discord.Color.green()
-        )
-        if top_dice:
-            for pair, count in top_dice:
-                embed.add_field(name=f"🎲 {pair}", value=f"{count} fois", inline=True)
-        else:
-            embed.add_field(name="Aucun résultat", value="Pas de lancer de dé enregistré.", inline=False)
-        await message.channel.send(embed=embed)
-        return
-
-    if message.content.lower().startswith("!statsnombre"):
-        target_user = message.mentions[0] if message.mentions else message.author
-        top_number = get_top_number(target_user.id)
-        embed = discord.Embed(
-            title=f"Top 5 nombres pour {target_user.display_name}",
-            color=discord.Color.orange()
-        )
-        if top_number:
-            for result, count in top_number:
-                embed.add_field(name=f"🔢 {result}", value=f"{count} fois", inline=True)
-        else:
-            embed.add_field(name="Aucun résultat", value="Pas de nombre enregistré.", inline=False)
-        await message.channel.send(embed=embed)
-        return
-
 
     if (
         any(mot in contenu for mot in ('goulth', 'pouyol', 'bouyol', 'groulth')) 
