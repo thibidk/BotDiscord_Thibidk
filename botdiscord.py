@@ -560,7 +560,7 @@ async def daily_ayah():
 @tasks.loop(minutes=1)
 async def daily_surah():
     now = datetime.datetime.now()
-    if now.hour == 8 and now.minute == 0:
+    if now.hour == 8 and now.minute == 10:
         titre, ayah_texts, full_texts, surah_number = await get_random_surah()
         for user_id in USER_IDS_HADITH:
             user = await client.fetch_user(user_id)
