@@ -19,6 +19,9 @@ from champions import CHAMPION_NAME_TO_ID, CHAMPION_NAME_FIX
 def log(msg):
     print(f"[{datetime.datetime.now().strftime('%H:%M:%S')}] {msg}")
 
+def split_message(text, max_length=2000):
+    return [text[i:i+max_length] for i in range(0, len(text), max_length)]
+
 log("Lancement du bot...")
 
 load_dotenv()
@@ -356,9 +359,6 @@ async def on_message(message):
         await message.channel.send(ayah)
         return
 
-    def split_message(text, max_length=2000):
-        return [text[i:i+max_length] for i in range(0, len(text), max_length)]
-
     if message.content.lower().startswith("!sourate"):
         await message.channel.typing()
         titre, ayah_texts, full_texts, surah_number = await get_random_surah()
@@ -561,11 +561,12 @@ async def daily_ayah():
 async def daily_surah():
     now = datetime.datetime.now()
     if now.hour == 8 and now.minute == 0:
-        surah = await get_random_surah()
+        titre, ayah_texts, full_texts, surah_number = await get_random_surah()
         for user_id in USER_IDS_HADITH:
             user = await client.fetch_user(user_id)
             log(f"Envoi de la sourate à {user_id} à {now.strftime('%H:%M')}")
-            await user.send(f"🕌 {surah}")
+            for part in split_message(f"🕌 {titre} (N°{surah_number})\n{full_texts}", max_length=2000):
+                await user.send(part)
 
 @client.event
 async def on_ready():
