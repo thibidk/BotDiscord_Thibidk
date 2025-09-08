@@ -8,9 +8,11 @@ Ce bot Discord propose :
 - Suivi de parties League of Legends (récupération du rang, champion, winrate, etc.), Attention, je n'ai pas réussi à récupérer l'élo du joueur. L'embed discord n'est pas encore à jour, il y a seulement le strict minimum.
 - Réponses personnalisées selon les messages ou mentions.
 - Chat IA avec OpenAI (texte et images, si tu as accès à GPT-4o via API openAI, attention il faut payer pour avoir des tokens sur votre key, le bot ne pourra pas fournir de réponse s'il n'y a pas de token)
-- Rappel des horaires de prières (Strasbourg mais reste modidifiable)
+- Rappel des horaires de prières 1h avant, le temps du rappel ainsi que le lieu peuvent être modifier (actuellement horaire de Strasbourg), commande !prière pour savoir à quelle heure est la prochaine prière
 - Réponses aux messages privés (texte et images)
 - Commandes diverses comme `!dé` ou `!nombre` qui génère un résultat au hasard
+- Commandes `!hadith`, `!sourate`, `!verset`, envoie au hasard ce qui est demandé
+- Fonction permettant de recevoir tous les matins (modifiable), un hadith, une sourate, un verset du Qur'an au hasard
 
 ---
 
@@ -48,6 +50,7 @@ Exemple de mon contenu :
 - GAME_CHANNEL_ID=ID_du_channel (clic droit copier l'identifiant du salon)
 - GENERAL_CHANNEL_ID=ID_du_channel (clic droit copier l'identifiant du salon)
 - USER_IDS_TO_NOTIFY=USER_ID=USER_ID (clic droit sur une personne discord)
+- USER_IDS_ISLAM=USER_ID (clic droit sur une personne discord)
 
 Pour les channels ainsi que user IDs, il est possible d'ajouter plusieurs ID de cette manière (attention aux virgules et aux espaces) : 
 
@@ -62,8 +65,9 @@ Il vous faudra changer quelques paramètres pour que le bot vous soit utile comm
 async def get_prayer_times_aladhan():
 ```
 - **Possibilité de modifier l'heure du rappel** : Modifier le temps dans la variable PRAYER_ADVANCE_MINUTES
-- **Possibilité d'ajouter des membres ou des channels dans le .env** : Coller l'ID (suivre l'exemple du .3)
+- **Possibilité d'ajouter des membres ou des channels dans le .env** : Coller l'ID (suivre l'exemple du **.3**)
 - **Modifier les réponses du bot** : Change le dictionnaire `reponses` ou les conditions dans `on_message`.
+- **Possibiliter d'ajouter des Hadiths** : ajouter dans le fichier `hadiths.py` les hadiths que vous souhaitez
 
 ### 5. **Lancer le bot**
 ```sh
@@ -76,8 +80,10 @@ Ou run directement avec le bouton sur VCS
 - **Chat IA** : Mentionne le bot ou parle-lui en DM pour une réponse IA (texte ou image).
 - **Réponses personnalisées** : Blagues, réponses à certains pseudos, interactions selon certaines mots... 
 - **Rappel de prières** : Envoie un rappel en DM avant chaque prière (Strasbourg). Possibilité de changer les DM par un channel discord.
-- **Suivi LoL** : Annonce automatiquement quand un joueur de la liste lance une partie.
-- **!dé** : Lance deux dés (1 à 6) et affiche le résultat.
+- **Suivi LoL** : Annonce automatiquement quand un joueur de la liste lance une partie avec affichage de la queue, le champion, le winrate...
+- **!verset, !sourate** : Permet d'avoir un verset ou une sourate aléatoire du Qur'an
+- **Rappel verset et sourate** : Reçoit un verset et/ou une sourate du Qur'an à une heure précise de la journée
+- - **Commande fun !dé ou !nombre** : Afin d'obtenir un résultat aléatoire 
 ---
 
 ## Dépendances
