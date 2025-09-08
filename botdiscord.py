@@ -45,6 +45,14 @@ COMMAND_STATS = {
     "nombre": 0,
     "prière": 0,
 }
+EMOJIS_COMMANDES = {
+    "dé": "🎲",
+    "nombre": "🔢",
+    "hadith": "🕌",
+    "verset": "📖",
+    "sourate": "📜",
+    "prière": "🕋",
+}
 
 # =============== DATACLASSES & JOUEURS ===============
 @dataclass
@@ -87,21 +95,22 @@ def init_db():
         conn = sqlite3.connect(DB_PATH)
         c = conn.cursor()
         c.execute("""
-            CREATE TABLE IF NOT EXISTS stats (
-                command TEXT PRIMARY KEY,
-                count INTEGER
+            CREATE TABLE IF NOT EXISTS dice_results (
+                user_id INTEGER,
+                pair TEXT,
+                count INTEGER,
+                PRIMARY KEY (user_id, pair)
             )
         """)
         c.execute("""
-            CREATE TABLE IF NOT EXISTS user_stats (
+            CREATE TABLE IF NOT EXISTS number_results (
                 user_id INTEGER,
-                command TEXT,
+                result INTEGER,
                 count INTEGER,
-                PRIMARY KEY (user_id, command)
+                PRIMARY KEY (user_id, result)
             )
         """)
-        for cmd in COMMAND_STATS:
-            c.execute("INSERT OR IGNORE INTO stats (command, count) VALUES (?, ?)", (cmd, 0))
+        # ...reste du code...
         conn.commit()
         conn.close()
     except Exception as e:
@@ -156,6 +165,69 @@ def get_user_stats(user_id):
         log(f"Erreur SQLite get_user_stats: {e}")
         return {}
     
+def save_dice_pair(user_id, de1, de2):
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        pair = f"{de1}&{de2}"
+        c.execute("""
+            INSERT INTO dice_results (user_id, pair, count)
+            VALUES (?, ?, 1)
+            ON CONFLICT(user_id, pair) DO UPDATE SET count = count + 1
+        """, (user_id, pair))
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        log(f"Erreur SQLite save_dice_pair: {e}")
+
+def save_number_result(user_id, result):
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        c.execute("""
+            INSERT INTO number_results (user_id, result, count)
+            VALUES (?, ?, 1)
+            ON CONFLICT(user_id, result) DO UPDATE SET count = count + 1
+        """, (user_id, result))
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        log(f"Erreur SQLite save_number_result: {e}")
+
+def get_top_dice_pairs(user_id):
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        c.execute("""
+            SELECT pair, count FROM dice_results
+            WHERE user_id = ?
+            ORDER BY count DESC
+            LIMIT 5
+        """, (user_id,))
+        rows = c.fetchall()
+        conn.close()
+        return rows
+    except Exception as e:
+        log(f"Erreur SQLite get_top_dice_pairs: {e}")
+        return []
+
+def get_top_number(user_id):
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        c.execute("""
+            SELECT result, count FROM number_results
+            WHERE user_id = ?
+            ORDER BY count DESC
+            LIMIT 5
+        """, (user_id,))
+        rows = c.fetchall()
+        conn.close()
+        return rows
+    except Exception as e:
+        log(f"Erreur SQLite get_top_number: {e}")
+        return []
+
 init_db()
 load_stats()
 
@@ -494,6 +566,7 @@ async def on_message(message):
         save_user_stat(message.author.id, "dé")
         de1 = random.randint(1, 6)
         de2 = random.randint(1, 6)
+        save_dice_pair(message.author.id, de1, de2)
         await message.channel.send(f"🎲 Tu as lancé : {de1} et {de2} !")
         return
 
@@ -502,6 +575,7 @@ async def on_message(message):
         save_stat("nombre")
         save_user_stat(message.author.id, "nombre")
         nombre = random.randint(1, 10)
+        save_number_result(message.author.id, nombre)
         await message.channel.send(f"🔢 Le nombre aléatoire est : {nombre} !")
         return
     
@@ -519,11 +593,43 @@ async def on_message(message):
         )
         if user_stats:
             for cmd, count in user_stats.items():
-                embed.add_field(name=cmd.capitalize(), value=str(count), inline=True)
+                emoji = EMOJIS_COMMANDES.get(cmd, "")
+                embed.add_field(name=f"{emoji} {cmd.capitalize()}", value=str(count), inline=True)
         else:
             embed.add_field(name="Aucune commande utilisée", value="Cet utilisateur n'a pas encore utilisé de commande.", inline=False)
         await message.channel.send(embed=embed)
         return
+
+    if message.content.lower().startswith("!statsdé"):
+        target_user = message.mentions[0] if message.mentions else message.author
+        top_dice = get_top_dice_pairs(target_user.id)
+        embed = discord.Embed(
+            title=f"Top 5 paires de dés pour {target_user.display_name}",
+            color=discord.Color.green()
+        )
+        if top_dice:
+            for pair, count in top_dice:
+                embed.add_field(name=f"🎲 {pair}", value=f"{count} fois", inline=True)
+        else:
+            embed.add_field(name="Aucun résultat", value="Pas de lancer de dé enregistré.", inline=False)
+        await message.channel.send(embed=embed)
+        return
+
+    if message.content.lower().startswith("!statsnombre"):
+        target_user = message.mentions[0] if message.mentions else message.author
+        top_number = get_top_number(target_user.id)
+        embed = discord.Embed(
+            title=f"Top 5 nombres pour {target_user.display_name}",
+            color=discord.Color.orange()
+        )
+        if top_number:
+            for result, count in top_number:
+                embed.add_field(name=f"🔢 {result}", value=f"{count} fois", inline=True)
+        else:
+            embed.add_field(name="Aucun résultat", value="Pas de nombre enregistré.", inline=False)
+        await message.channel.send(embed=embed)
+        return
+
 
     if (
         any(mot in contenu for mot in ('goulth', 'pouyol', 'bouyol', 'groulth')) 
