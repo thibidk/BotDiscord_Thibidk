@@ -10,6 +10,7 @@ import subprocess
 import sys
 import asyncio
 import discord
+import sqlite3
 from dataclasses import dataclass
 from discord.ext import tasks
 from hadiths import HADITHS_LOCAL
@@ -34,6 +35,7 @@ USER_IDS_TO_NOTIFY = [int(uid.strip()) for uid in user_ids_raw.split(',') if uid
 user_ids_islam_raw = os.getenv('USER_IDS_ISLAM', '')
 USER_IDS_ISLAM = [int(uid.strip()) for uid in user_ids_islam_raw.split(',') if uid.strip()]
 PRAYER_ADVANCE_MINUTES = 60
+DB_PATH = 'command_stats.db'
 
 COMMAND_STATS = {
     "hadith": 0,
@@ -78,6 +80,84 @@ async def fetch_puuids():
                     log(f"Erreur pour {player.gameName}#{player.tagLine} : {response.status} - {await response.text()}")
 
 last_announced_game_ids = {}  # clé = puuid, valeur = gameId
+
+# =============== Base de données ===============
+def init_db():
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        c.execute("""
+            CREATE TABLE IF NOT EXISTS stats (
+                command TEXT PRIMARY KEY,
+                count INTEGER
+            )
+        """)
+        c.execute("""
+            CREATE TABLE IF NOT EXISTS user_stats (
+                user_id INTEGER,
+                command TEXT,
+                count INTEGER,
+                PRIMARY KEY (user_id, command)
+            )
+        """)
+        for cmd in COMMAND_STATS:
+            c.execute("INSERT OR IGNORE INTO stats (command, count) VALUES (?, ?)", (cmd, 0))
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        log(f"Erreur SQLite lors de l'initialisation de la base : {e}")
+
+def load_stats():
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        c.execute("SELECT command, count FROM stats")
+        rows = c.fetchall()
+        for cmd, count in rows:
+            COMMAND_STATS[cmd] = count
+        conn.close()
+    except Exception as e:
+        log(f"Erreur SQLite lors du chargement des stats : {e}")
+
+def save_stat(command):
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        c.execute("UPDATE stats SET count = ? WHERE command = ?", (COMMAND_STATS[command], command))
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        log(f"Erreur SQLite lors de la sauvegarde de '{command}': {e}")
+
+def save_user_stat(user_id, command):
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        # Ajoute ou incrémente la stat
+        c.execute("""
+            INSERT INTO user_stats (user_id, command, count)
+            VALUES (?, ?, 1)
+            ON CONFLICT(user_id, command) DO UPDATE SET count = count + 1
+        """, (user_id, command))
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        log(f"Erreur SQLite user_stats: {e}")
+
+def get_user_stats(user_id):
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        c.execute("SELECT command, count FROM user_stats WHERE user_id = ?", (user_id,))
+        rows = c.fetchall()
+        conn.close()
+        return {cmd: count for cmd, count in rows}
+    except Exception as e:
+        log(f"Erreur SQLite get_user_stats: {e}")
+        return {}
+    
+init_db()
+load_stats()
 
 # =============== FONCTIONS OPENAI ===============
 async def ask_gpt(prompt):
@@ -364,6 +444,8 @@ async def on_message(message):
     
     if message.content.lower().startswith("!verset"):
         COMMAND_STATS["verset"] += 1
+        save_stat("verset")
+        save_user_stat(message.author.id, "verset")
         await message.channel.typing()
         ayah = await get_random_ayah()
         await message.channel.send(ayah)
@@ -371,6 +453,8 @@ async def on_message(message):
 
     if message.content.lower().startswith("!sourate"):
         COMMAND_STATS["sourate"] += 1
+        save_stat("sourate")
+        save_user_stat(message.author.id, "sourate")
         await message.channel.typing()
         titre, full_texts, surah_number = await get_random_surah()
         for part in split_message(f"{titre} (N°{surah_number})\n{full_texts}"):
@@ -379,6 +463,8 @@ async def on_message(message):
 
     if message.content.lower().startswith("!hadith"):
         COMMAND_STATS["hadith"] += 1
+        save_stat("hadith")
+        save_user_stat(message.author.id, "hadith")
         await message.channel.typing()
         hadith = await get_random_hadith()
         await message.channel.send(hadith)
@@ -386,6 +472,8 @@ async def on_message(message):
 
     if message.content.lower().startswith("!prière"):
         COMMAND_STATS["prière"] += 1
+        save_stat("prière")
+        save_user_stat(message.author.id, "prière")
         times = await get_prayer_times_aladhan()
         now = datetime.datetime.now().time()
         prochaine = None
@@ -402,6 +490,8 @@ async def on_message(message):
 
     if "!dé" in message.content.lower():
         COMMAND_STATS["dé"] += 1
+        save_stat("dé")
+        save_user_stat(message.author.id, "dé")
         de1 = random.randint(1, 6)
         de2 = random.randint(1, 6)
         await message.channel.send(f"🎲 Tu as lancé : {de1} et {de2} !")
@@ -409,10 +499,32 @@ async def on_message(message):
 
     if "!nombre" in message.content.lower():
         COMMAND_STATS["nombre"] += 1
+        save_stat("nombre")
+        save_user_stat(message.author.id, "nombre")
         nombre = random.randint(1, 10)
         await message.channel.send(f"🔢 Le nombre aléatoire est : {nombre} !")
         return
     
+    if message.content.lower().startswith("!stats"):
+        if message.mentions:
+            target_user = message.mentions[0]
+        else:
+            target_user = message.author
+
+        user_stats = get_user_stats(target_user.id)
+        embed = discord.Embed(
+            title=f"Statistiques de {target_user.display_name}",
+            description=f"Nombre de commandes utilisées par {target_user.mention}",
+            color=discord.Color.blue()
+        )
+        if user_stats:
+            for cmd, count in user_stats.items():
+                embed.add_field(name=cmd.capitalize(), value=str(count), inline=True)
+        else:
+            embed.add_field(name="Aucune commande utilisée", value="Cet utilisateur n'a pas encore utilisé de commande.", inline=False)
+        await message.channel.send(embed=embed)
+        return
+
     if (
         any(mot in contenu for mot in ('goulth', 'pouyol', 'bouyol', 'groulth')) 
         or any(user.id == 206010121371779073 for user in message.mentions)
@@ -459,6 +571,8 @@ async def on_message(message):
         if contenu in reponses:
             await message.channel.send(reponses[contenu])
         return
+    
+
 
 # =============== Loop Lol ===============
 @tasks.loop(minutes=3)
@@ -584,6 +698,22 @@ async def daily_surah():
             for part in split_message(f"Sourate 🕌 {titre} (N°{surah_number})\n{full_texts}", max_length=2000):
                 await user.send(part)
 
+# =============== Loop Save Stats ===============
+
+@tasks.loop(minutes=5)
+async def batch_save_stats():
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        for cmd, count in COMMAND_STATS.items():
+            c.execute("UPDATE stats SET count = ? WHERE command = ?", (count, cmd))
+        conn.commit()
+        conn.close()
+        log("Stats sauvegardées en batch.")
+    except Exception as e:
+        log(f"Erreur batch SQLite: {e}")
+
+
 @client.event
 async def on_ready():
     await fetch_puuids()
@@ -595,8 +725,10 @@ async def on_ready():
         daily_hadith.start()
     if not daily_surah.is_running():
         daily_surah.start()
+    if not batch_save_stats.is_running():
+        batch_save_stats.start()
     asyncio.create_task(auto_update())
-
+    
 # =============== Mise à jour automatique du bot ===============
 
 async def auto_update(interval_minutes=60):

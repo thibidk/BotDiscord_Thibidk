@@ -13,6 +13,7 @@ Ce bot Discord propose :
 - Commandes `!hadith`, `!sourate`, `!verset`, envoie au hasard ce qui est demandé
 - Fonction permettant de recevoir tous les matins (modifiable), un hadith, une sourate, un verset du Qur'an au hasard
 - Commandes diverses comme `!dé` ou `!nombre` qui génère un résultat au hasard
+- Commande `!stats` ou `!stats @user` pour voir le nombre de commande effectué 
 
 ---
 
