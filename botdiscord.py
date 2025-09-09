@@ -255,8 +255,8 @@ def reset_stats():
             number_stats.setdefault(user_id, {})[result] = count
         stats_before["number"] = number_stats
 
-        c.execute("UPDATE stats SET count = 0")
-        c.execute("UPDATE user_stats SET count = 0")
+        c.execute("DELETE FROM stats")
+        c.execute("DELETE FROM user_stats")
         c.execute("DELETE FROM dice_results")
         c.execute("DELETE FROM number_results")
         conn.commit()
