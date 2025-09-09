@@ -233,6 +233,28 @@ def reset_stats():
     try:
         conn = sqlite3.connect(DB_PATH)
         c = conn.cursor()
+
+        c.execute("SELECT command, count FROM stats")
+        stats_before = {"global": dict(c.fetchall())}
+
+        c.execute("SELECT user_id, command, count FROM user_stats")
+        user_stats = {}
+        for user_id, command, count in c.fetchall():
+            user_stats.setdefault(user_id, {})[command] = count
+        stats_before["user"] = user_stats
+
+        c.execute("SELECT user_id, pair, count FROM dice_results")
+        dice_stats = {}
+        for user_id, pair, count in c.fetchall():
+            dice_stats.setdefault(user_id, {})[pair] = count
+        stats_before["dice"] = dice_stats
+
+        c.execute("SELECT user_id, result, count FROM number_results")
+        number_stats = {}
+        for user_id, result, count in c.fetchall():
+            number_stats.setdefault(user_id, {})[result] = count
+        stats_before["number"] = number_stats
+
         c.execute("UPDATE stats SET count = 0")
         c.execute("UPDATE user_stats SET count = 0")
         c.execute("UPDATE dice_results SET count = 0")
@@ -240,8 +262,10 @@ def reset_stats():
         conn.commit()
         conn.close()
         log("Toutes les stats ont été réinitialisées.")
+        return stats_before
     except Exception as e:
         log(f"Erreur SQLite reset_stats: {e}")
+        return None
 
 init_db()
 load_stats()
