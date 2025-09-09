@@ -783,11 +783,11 @@ async def daily_hadith():
 async def daily_ayah():
     now = datetime.datetime.now()
     if now.hour == 8 and now.minute == 0:
-        titre, full_texts, surah_number = await get_random_ayah()
+        ayah = await get_random_ayah()
         for user_id in USER_IDS_ISLAM:
             user = await client.fetch_user(user_id)
             log(f"Envoi du verset à {user_id} à {now.strftime('%H:%M')}")
-            for part in split_message(f"Sourate 🕌 {titre} (N°{surah_number})\n{full_texts}", max_length=2000):
+            for part in split_message(f"Sourate 🕌\n{ayah}", max_length=2000):
                 await user.send(part)
 
 # =============== Loop Sourates ===============
@@ -796,7 +796,7 @@ async def daily_ayah():
 async def daily_surah():
     now = datetime.datetime.now()
     if now.hour == 8 and now.minute == 5:
-        titre, full_texts, surah_number = await get_random_surah()
+        titre, ayah_texts, full_texts, surah_number = await get_random_surah()
         for user_id in USER_IDS_ISLAM:
             user = await client.fetch_user(user_id)
             log(f"Envoi de la sourate à {user_id} à {now.strftime('%H:%M')}")
