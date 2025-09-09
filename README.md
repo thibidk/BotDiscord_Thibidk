@@ -13,8 +13,8 @@ Ce bot Discord propose :
 - Commandes `!hadith`, `!sourate`, `!verset`, envoie au hasard ce qui est demandé
 - Fonction permettant de recevoir tous les matins (modifiable), un hadith, une sourate, un verset du Qur'an au hasard
 - Commandes diverses comme `!dé` ou `!nombre` qui génère un résultat au hasard
-- Commande `!stats` ou `!stats @user` pour voir le nombre de commande effectué 
-- Commande `!resetstats` ou `!resetstats @user` pour reset les stats de tous les utilisateurs ou les stats d'un utilisateur (commande uniquement pour les admins du serveur discord)
+- Commande `!stats`,`!statsdé`,`!statsnb` pour voir son nombre de commande ainsi que les résultats obtenu ou ajouter `@user` pour voir le nombre de commande effectué par l'utilisateur ciblé
+- Commande `!resetstats` pour reset ses stats ou `!resetstats @user` pour reset les stats d'un utilisateur (commande uniquement pour les admins du serveur discord)
 ---
 
 ## Installation
