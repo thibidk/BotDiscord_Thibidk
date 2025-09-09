@@ -266,6 +266,19 @@ def reset_stats():
     except Exception as e:
         log(f"Erreur SQLite reset_stats: {e}")
         return None
+    
+def reset_user_stats(user_id):
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        c.execute("UPDATE user_stats SET count = 0 WHERE user_id = ?", (user_id,))
+        c.execute("DELETE FROM dice_results WHERE user_id = ?", (user_id,))
+        c.execute("DELETE FROM number_results WHERE user_id = ?", (user_id,))
+        conn.commit()
+        conn.close()
+        log(f"Stats réinitialisées pour l'utilisateur {user_id}.")
+    except Exception as e:
+        log(f"Erreur SQLite reset_user_stats: {e}")
 
 init_db()
 load_stats()
@@ -458,11 +471,16 @@ async def on_message(message):
         return
     
     if message.content.lower().startswith("!resetstats"):
-        if hasattr(message.author, "guild_permissions") and not message.author.guild_permissions.administrator:
-            await message.channel.send("⛔ Seuls les admins peuvent réinitialiser les stats.")
-            return
-        reset_stats()
-        await message.channel.send("✅ Toutes les statistiques ont été réinitialisées.")
+        if message.mentions:
+            target_user = message.mentions[0]
+            if hasattr(message.author, "guild_permissions") and not message.author.guild_permissions.administrator:
+                await message.channel.send("⛔ Seuls les admins peuvent réinitialiser les stats d'un autre utilisateur.")
+                return
+            reset_user_stats(target_user.id)
+            await message.channel.send(f"✅ Les statistiques de {target_user.mention} ont été réinitialisées.")
+        else:
+            reset_user_stats(message.author.id)
+            await message.channel.send("✅ Tes statistiques ont été réinitialisées.")
         return
     
     if isinstance(message.channel, discord.DMChannel):
