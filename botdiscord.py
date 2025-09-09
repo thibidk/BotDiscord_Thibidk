@@ -257,8 +257,8 @@ def reset_stats():
 
         c.execute("UPDATE stats SET count = 0")
         c.execute("UPDATE user_stats SET count = 0")
-        c.execute("UPDATE dice_results SET count = 0")
-        c.execute("UPDATE number_results SET count = 0")
+        c.execute("DELETE FROM dice_results")
+        c.execute("DELETE FROM number_results")
         conn.commit()
         conn.close()
         log("Toutes les stats ont été réinitialisées.")
