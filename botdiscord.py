@@ -782,7 +782,7 @@ async def daily_hadith():
 @tasks.loop(minutes=1)
 async def daily_ayah():
     now = datetime.datetime.now()
-    if now.hour == 8 and now.minute == 0:
+    if now.hour == 8 and now.minute == 17:
         ayah = await get_random_ayah()
         for user_id in USER_IDS_ISLAM:
             user = await client.fetch_user(user_id)
@@ -795,7 +795,7 @@ async def daily_ayah():
 @tasks.loop(minutes=1)
 async def daily_surah():
     now = datetime.datetime.now()
-    if now.hour == 8 and now.minute == 5:
+    if now.hour == 8 and now.minute == 16:
         titre, ayah_texts, full_texts, surah_number = await get_random_surah()
         for user_id in USER_IDS_ISLAM:
             user = await client.fetch_user(user_id)
