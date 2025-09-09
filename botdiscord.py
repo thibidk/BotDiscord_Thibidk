@@ -36,6 +36,7 @@ user_ids_islam_raw = os.getenv('USER_IDS_ISLAM', '')
 USER_IDS_ISLAM = [int(uid.strip()) for uid in user_ids_islam_raw.split(',') if uid.strip()]
 PRAYER_ADVANCE_MINUTES = 60
 DB_PATH = 'command_stats.db'
+ADMINS = os.getenv('ADMINS'),
 
 COMMAND_STATS = {
     "hadith": 0,
@@ -228,6 +229,20 @@ def get_top_number(user_id):
         log(f"Erreur SQLite get_top_number: {e}")
         return []
 
+def reset_stats():
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        c.execute("UPDATE stats SET count = 0")
+        c.execute("UPDATE user_stats SET count = 0")
+        c.execute("UPDATE dice_results SET count = 0")
+        c.execute("UPDATE number_results SET count = 0")
+        conn.commit()
+        conn.close()
+        log("Toutes les stats ont été réinitialisées.")
+    except Exception as e:
+        log(f"Erreur SQLite reset_stats: {e}")
+
 init_db()
 load_stats()
 
@@ -418,6 +433,14 @@ async def on_message(message):
     if message.author == client.user:
         return
     
+    if message.content.lower().startswith("!resetstats"):
+        if hasattr(message.author, "guild_permissions") and not message.author.guild_permissions.administrator:
+            await message.channel.send("⛔ Seuls les admins peuvent réinitialiser les stats.")
+            return
+        reset_stats()
+        await message.channel.send("✅ Toutes les statistiques ont été réinitialisées.")
+        return
+    
     if isinstance(message.channel, discord.DMChannel):
         await message.channel.typing()
         try:
@@ -585,7 +608,7 @@ async def on_message(message):
         await message.channel.send(embed=embed)
         return
 
-    elif message.content.lower().startswith("!statsnombre"):
+    elif message.content.lower().startswith("!statsnb"):
         target_user = message.mentions[0] if message.mentions else message.author
         top_number = get_top_number(target_user.id)
         embed = discord.Embed(
