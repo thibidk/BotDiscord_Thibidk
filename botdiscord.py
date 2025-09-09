@@ -382,13 +382,13 @@ async def get_random_ayah(edition="fr.hamidullah"):
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as resp:
             if resp.status != 200:
-                return "Impossible de récupérer un verset pour le moment."
+                return "Impossible de récupérer un verset pour le moment.", None
             data = await resp.json()
             ayah = data.get("data", {})
             texte = ayah.get("text", "Verset inconnu.")
             sourate = ayah.get("surah", {}).get("englishName", "")
             numero = ayah.get("numberInSurah", "")
-            return f"**{sourate} [{numero}]**\n{texte}"
+            return f"**{sourate} [{numero}]**\n{texte}", numero
         
 async def get_random_surah(edition="fr.hamidullah"):
     surah_number = random.randint(1, 114)
@@ -761,7 +761,7 @@ async def prayer_reminder():
 @tasks.loop(minutes=1)
 async def daily_hadith():
     now = datetime.datetime.now()
-    if now.hour == 8 and now.minute == 0:
+    if now.hour == 7 and now.minute == 0:
         for user_id in USER_IDS_ISLAM:
             hadith = random.choice(HADITHS_LOCAL)
             user = await client.fetch_user(user_id)
@@ -774,12 +774,12 @@ async def daily_hadith():
 async def daily_ayah():
     now = datetime.datetime.now()
     log(f"daily_ayah: {now.hour}:{now.minute}")
-    if now.hour == 8 and now.minute == 52:
-        ayah = await get_random_ayah()
+    if now.hour == 7 and now.minute == 5:
+        ayah, numero = await get_random_ayah()
         for user_id in USER_IDS_ISLAM:
             user = await client.fetch_user(user_id)
             log(f"Envoi du verset à {user_id} à {now.strftime('%H:%M')}")
-            for part in split_message(f"Sourate 🕌\n{ayah}", max_length=2000):
+            for part in split_message(f"Sourate 🕌 (Verset n°{numero})\n{ayah}", max_length=2000):
                 await user.send(part)
 
 # =============== Loop Sourates ===============
@@ -787,12 +787,12 @@ async def daily_ayah():
 @tasks.loop(minutes=1)
 async def daily_surah():
     now = datetime.datetime.now()
-    if now.hour == 8 and now.minute == 16:
+    if now.hour == 8 and now.minute == 0:
         titre, ayah_texts, full_texts, surah_number = await get_random_surah()
         for user_id in USER_IDS_ISLAM:
             user = await client.fetch_user(user_id)
             log(f"Envoi de la sourate à {user_id} à {now.strftime('%H:%M')}")
-            for part in split_message(f"Sourate 🕌 {titre} (N°{surah_number})\n{full_texts}", max_length=2000):
+            for part in split_message(f"Sourate 📜 {titre} (N°{surah_number})\n{full_texts}", max_length=2000):
                 await user.send(part)
 
 # =============== Loop Save Stats ===============
