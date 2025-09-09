@@ -419,9 +419,10 @@ async def on_ready():
         check_games.start()
     if not prayer_reminder.is_running():
         prayer_reminder.start()
-    asyncio.create_task(auto_update()) 
     if not daily_ayah.is_running():
         daily_ayah.start()
+    asyncio.create_task(auto_update()) 
+    
 
 @client.event
 async def on_message(message):
@@ -520,7 +521,8 @@ async def on_message(message):
         save_user_stat(message.author.id, "verset")
         await message.channel.typing()
         ayah = await get_random_ayah()
-        await message.channel.send(ayah)
+        for part in split_message(f"📖{titre}\n{ayah}"):
+            await message.channel.send(part)
         return
 
     if message.content.lower().startswith("!sourate"):
@@ -529,7 +531,7 @@ async def on_message(message):
         save_user_stat(message.author.id, "sourate")
         await message.channel.typing()
         titre, full_texts, surah_number = await get_random_surah()
-        for part in split_message(f"{titre} (N°{surah_number})\n{full_texts}"):
+        for part in split_message(f"📜{titre} (N°{surah_number})\n{full_texts}"):
             await message.channel.send(part)
         return
 
@@ -782,7 +784,7 @@ async def daily_hadith():
 @tasks.loop(minutes=1)
 async def daily_ayah():
     now = datetime.datetime.now()
-    if now.hour == 8 and now.minute == 17:
+    if now.hour == 8 and now.minute == 39:
         ayah = await get_random_ayah()
         for user_id in USER_IDS_ISLAM:
             user = await client.fetch_user(user_id)
