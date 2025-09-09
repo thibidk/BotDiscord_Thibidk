@@ -412,17 +412,6 @@ async def get_random_surah(edition="fr.hamidullah"):
 intents = discord.Intents.all()
 client = discord.Client(intents=intents)
 
-@client.event
-async def on_ready():
-    await fetch_puuids()
-    if not check_games.is_running():
-        check_games.start()
-    if not prayer_reminder.is_running():
-        prayer_reminder.start()
-    if not daily_ayah.is_running():
-        daily_ayah.start()
-    asyncio.create_task(auto_update()) 
-    
 
 @client.event
 async def on_message(message):
@@ -785,7 +774,7 @@ async def daily_hadith():
 async def daily_ayah():
     now = datetime.datetime.now()
     log(f"daily_ayah: {now.hour}:{now.minute}")
-    if now.hour == 8 and now.minute == 42:
+    if now.hour == 8 and now.minute == 52:
         ayah = await get_random_ayah()
         for user_id in USER_IDS_ISLAM:
             user = await client.fetch_user(user_id)
@@ -833,9 +822,12 @@ async def on_ready():
         daily_hadith.start()
     if not daily_surah.is_running():
         daily_surah.start()
+    if not daily_ayah.is_running():
+        daily_ayah.start()
     if not batch_save_stats.is_running():
         batch_save_stats.start()
-    asyncio.create_task(auto_update())
+    asyncio.create_task(auto_update()) 
+
     
 # =============== Mise à jour automatique du bot ===============
 
