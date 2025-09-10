@@ -839,11 +839,12 @@ async def daily_hadith():
 async def daily_ayah():
     now = datetime.datetime.now()
     if now.hour == 7 and now.minute == 5:
-        ayah, numero = await get_random_ayah()
+        texte, sourate, numero, ayah_id = await get_random_ayah()
         for user_id in USER_IDS_ISLAM:
             user = await client.fetch_user(user_id)
             log(f"Envoi du verset à {user_id} à {now.strftime('%H:%M')}")
-            for part in split_message(f"Sourate 🕌 (Verset n°{numero})\n{ayah}", max_length=2000):
+            message = f"Sourate 📜 **{sourate}**\nVerset 📖 n°{numero} (ID global {ayah_id})\n{texte}"
+            for part in split_message(message, max_length=2000):
                 await user.send(part)
 
 # =============== Loop Sourates ===============
