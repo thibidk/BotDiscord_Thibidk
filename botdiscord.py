@@ -434,13 +434,14 @@ async def get_random_ayah(edition="fr.hamidullah"):
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as resp:
             if resp.status != 200:
-                return "Impossible de récupérer un verset pour le moment.", None
+                return "Impossible de récupérer un verset pour le moment.", None, None, None
             data = await resp.json()
             ayah = data.get("data", {})
             texte = ayah.get("text", "Verset inconnu.")
             sourate = ayah.get("surah", {}).get("englishName", "")
             numero = ayah.get("numberInSurah", "")
-            return f"**{sourate} [{numero}]**\n{texte}", numero
+            ayah_id = ayah.get("number", "")
+            return texte, sourate, numero, ayah_id
         
 async def get_random_surah(edition="fr.hamidullah"):
     surah_number = random.randint(1, 114)
@@ -838,7 +839,7 @@ async def daily_hadith():
 @tasks.loop(minutes=1)
 async def daily_ayah():
     now = datetime.datetime.now()
-    if now.hour == 7 and now.minute == 10:
+    if now.hour == 8 and now.minute == 15:
         texte, sourate, numero, ayah_id = await get_random_ayah()
         for user_id in USER_IDS_ISLAM:
             user = await client.fetch_user(user_id)
