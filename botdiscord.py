@@ -838,7 +838,7 @@ async def daily_hadith():
 @tasks.loop(minutes=1)
 async def daily_ayah():
     now = datetime.datetime.now()
-    if now.hour == 7 and now.minute == 5:
+    if now.hour == 7 and now.minute == 10:
         texte, sourate, numero, ayah_id = await get_random_ayah()
         for user_id in USER_IDS_ISLAM:
             user = await client.fetch_user(user_id)
