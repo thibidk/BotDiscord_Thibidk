@@ -11,7 +11,12 @@ Ce bot Discord propose :
 - Rappel des horaires de prières 1h avant, le temps du rappel ainsi que le lieu peuvent être modifier (actuellement horaire de Strasbourg), commande !prière pour savoir à quelle heure est la prochaine prière
 - Réponses aux messages privés (texte et images)
 - Commandes `!hadith` (désactivé retirer simplement les commentaires pour l'activer), `!sourate`, `!verset`, envoie au hasard ce qui est demandé
-- Fonction permettant de recevoir à une heure précise (modifiable), un hadith (désactivé aussi, activation de la même manière que la commande), une sourate, un verset du Qur'an au hasard
+- Fonction permettant de recevoir à une heure précise (modifiable), un hadith* , une sourate, un verset du Qur'an au hasard 
+*désactivé aussi, activation de la même manière que la commande, il vous faudra retirer le commantaire dans la fonction ce dessous pour pouvoir l'activer dans la boucle 
+```sh
+@client.event
+    async def on_ready():
+```
 - Commandes diverses comme `!dé` ou `!nombre` qui génère un résultat au hasard
 - Commande `!stats`,`!statsdé`,`!statsnb` pour voir son nombre de commande ainsi que les résultats obtenu ou ajouter `@user` pour voir le nombre de commande effectué par l'utilisateur ciblé
 - Commande `!resetstats` pour reset ses stats ou `!resetstats @user` pour reset les stats d'un utilisateur (commande uniquement pour les admins du serveur discord)

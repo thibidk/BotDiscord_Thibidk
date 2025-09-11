@@ -884,8 +884,8 @@ async def on_ready():
         check_games.start()
     if not prayer_reminder.is_running():
         prayer_reminder.start()
-    if not daily_hadith.is_running():
-        daily_hadith.start()
+    #if not daily_hadith.is_running():
+    #    daily_hadith.start()
     if not daily_surah.is_running():
         daily_surah.start()
     if not daily_ayah.is_running():
