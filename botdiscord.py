@@ -590,14 +590,14 @@ async def on_message(message):
             await message.channel.send(part)
         return
 
-    if message.content.lower().startswith("!hadith"):
-        COMMAND_STATS["hadith"] += 1
-        save_stat("hadith")
-        save_user_stat(message.author.id, "hadith")
-        await message.channel.typing()
-        hadith = await get_random_hadith()
-        await message.channel.send(hadith)
-        return
+    #if message.content.lower().startswith("!hadith"):
+    #    COMMAND_STATS["hadith"] += 1
+    #    save_stat("hadith")
+    #    save_user_stat(message.author.id, "hadith")
+    #    await message.channel.typing()
+    #    hadith = await get_random_hadith()
+    #    await message.channel.send(hadith)
+    #    return
 
     if message.content.lower().startswith("!prière"):
         COMMAND_STATS["prière"] += 1
@@ -824,15 +824,15 @@ async def prayer_reminder():
 
 # =============== Loop Hadith ===============
 
-@tasks.loop(minutes=1)
-async def daily_hadith():
-    now = datetime.datetime.now()
-    if now.hour == 7 and now.minute == 0:
-        for user_id in USER_IDS_ISLAM:
-            hadith = random.choice(HADITHS_LOCAL)
-            user = await client.fetch_user(user_id)
-            log(f"Envoi du hadith à {user_id} à {now.strftime('%H:%M')}")
-            await user.send(f"🕌 {hadith}")
+#@tasks.loop(minutes=1)
+#async def daily_hadith():
+#    now = datetime.datetime.now()
+#    if now.hour == 7 and now.minute == 0:
+#        for user_id in USER_IDS_ISLAM:
+#            hadith = random.choice(HADITHS_LOCAL)
+#            user = await client.fetch_user(user_id)
+#            log(f"Envoi du hadith à {user_id} à {now.strftime('%H:%M')}")
+#            await user.send(f"🕌 {hadith}")
 
 # =============== Loop Versets ===============
 
